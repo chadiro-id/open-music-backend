@@ -3,7 +3,7 @@ const mapAlbumDataToModel = ({
   name,
   year,
 }) => ({
-  albumId: id,
+  id,
   name,
   year,
 });
