@@ -24,10 +24,23 @@ class AlbumsHandler {
 
   async getAlbumsHandler() {
     const albums = await this._service.getAlbums();
+
     return {
       status: 'success',
       data: {
         albums,
+      }
+    };
+  }
+
+  async getAlbumByIdHandler(request) {
+    const { id } = request.params;
+    const album = await this._service.getAlbumById(id);
+
+    return {
+      status: 'success',
+      data: {
+        album,
       }
     };
   }
