@@ -29,6 +29,20 @@ class AlbumsService {
     const result = await this._pool.query('SELECT * FROM albums');
     return result.rows;
   }
+
+  async getAlbumById(id) {
+    const query = {
+      text: 'SELECT * FROM albums WHERE id = $1',
+      values: [id]
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError('Album tidak ditemukan');
+    }
+
+    return result.rows[0];
+  }
 }
 
 module.exports = AlbumsService;
