@@ -18,6 +18,7 @@ class AlbumsService {
     };
 
     const result = await this._pool.query(query);
+    console.log(`[Albums Service] add album -> result: ${result.rowCount}`);
     if (!result.rows[0].id) {
       throw new InvariantError('Album gagal ditambahkan');
     }
@@ -27,16 +28,18 @@ class AlbumsService {
 
   async getAlbums() {
     const result = await this._pool.query('SELECT * FROM albums');
+    console.log(`[Albums Service] get albums -> result: ${result.rowCount}`);
     return result.rows;
   }
 
   async getAlbumById(id) {
     const query = {
       text: 'SELECT * FROM albums WHERE id = $1',
-      values: [id]
+      values: [id],
     };
 
     const result = await this._pool.query(query);
+    console.log(`[Albums Service] get album -> result: ${result.rowCount}`);
     if (!result.rows.length) {
       throw new NotFoundError('Album tidak ditemukan');
     }
@@ -47,7 +50,7 @@ class AlbumsService {
   async editAlbumById(id, { name, year }) {
     const query = {
       text: 'UPDATE albums SET name = $1, year = $2 WHERE id = $3 RETURNING id',
-      values: [name, year, id]
+      values: [name, year, id],
     };
 
     const result = await this._pool.query(query);
@@ -58,11 +61,12 @@ class AlbumsService {
 
   async deleteAlbumById(id) {
     const query = {
-      text: 'DELETE FROM albums WHERE id = $1',
+      text: 'DELETE FROM albums WHERE id = $1 RETURNING id',
       values: [id],
     };
 
     const result = await this._pool.query(query);
+    console.log(`DELETE ${result.rowCount}`);
     if (!result.rows.length) {
       throw new NotFoundError('Album gagal dihapus. Id tidak ditemukan');
     }
