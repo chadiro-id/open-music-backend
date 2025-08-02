@@ -42,7 +42,7 @@ const init = async () => {
       return newResponse;
     }
 
-    h.continue;
+    return h.continue;
   });
 
   await server.start();
