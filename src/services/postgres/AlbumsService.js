@@ -18,7 +18,7 @@ class AlbumsService {
     };
 
     const result = await this._pool.query(query);
-    console.log(`[Albums Service] add album -> result: ${result.rowCount}`);
+    console.log(`[Albums Service] add album -> result count: ${result.rowCount}`);
     if (!result.rows[0].id) {
       throw new InvariantError('Album gagal ditambahkan');
     }
@@ -28,7 +28,7 @@ class AlbumsService {
 
   async getAlbums() {
     const result = await this._pool.query('SELECT * FROM albums');
-    console.log(`[Albums Service] get albums -> result: ${result.rowCount}`);
+    console.log(`[Albums Service] get albums -> result count: ${result.rowCount}`);
     return result.rows;
   }
 
@@ -39,7 +39,7 @@ class AlbumsService {
     };
 
     const result = await this._pool.query(query);
-    console.log(`[Albums Service] get album -> result: ${result.rowCount}`);
+    console.log(`[Albums Service] get album by id -> result count: ${result.rowCount}`);
     if (!result.rows.length) {
       throw new NotFoundError('Album tidak ditemukan');
     }
@@ -66,7 +66,7 @@ class AlbumsService {
     };
 
     const result = await this._pool.query(query);
-    console.log(`DELETE ${result.rowCount}`);
+    console.log(`[Albums Service] delete album by id -> result count: ${result.rowCount}`);
     if (!result.rows.length) {
       throw new NotFoundError('Album gagal dihapus. Id tidak ditemukan');
     }

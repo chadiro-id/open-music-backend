@@ -15,7 +15,6 @@ class AlbumsHandler {
 
     const albumId = await this._service.addAlbum({ name, year });
     console.log(`[Albums Handler] post album -> albumId: ${albumId}`);
-    console.log(`[Albums Handler] post album -> h: ${h}`);
 
     const response = h.response({
       status: 'success',
