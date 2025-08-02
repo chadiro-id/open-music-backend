@@ -26,11 +26,11 @@ class AlbumsService {
     return result.rows[0].id;
   }
 
-  async getAlbums() {
-    const result = await this._pool.query('SELECT * FROM albums');
-    console.log(`[Albums Service] get albums -> result count: ${result.rowCount}`);
-    return result.rows;
-  }
+  // async getAlbums() {
+  //   const result = await this._pool.query('SELECT * FROM albums');
+  //   console.log(`[Albums Service] get albums -> result count: ${result.rowCount}`);
+  //   return result.rows;
+  // }
 
   async getAlbumById(id) {
     const query = {

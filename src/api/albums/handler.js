@@ -28,17 +28,17 @@ class AlbumsHandler {
     return response;
   }
 
-  async getAlbumsHandler() {
-    const albums = await this._service.getAlbums();
-    console.log(`[Albums Handler] get albums -> albums: ${albums}`);
+  // async getAlbumsHandler() {
+  //   const albums = await this._service.getAlbums();
+  //   console.log(`[Albums Handler] get albums -> albums: ${albums}`);
 
-    return {
-      status: 'success',
-      data: {
-        albums,
-      }
-    };
-  }
+  //   return {
+  //     status: 'success',
+  //     data: {
+  //       albums,
+  //     }
+  //   };
+  // }
 
   async getAlbumByIdHandler(request) {
     const { id } = request.params;
