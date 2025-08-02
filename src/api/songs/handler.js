@@ -69,7 +69,7 @@ class SongsHandler {
 
     const { id } = request.params;
 
-    await this._service.editSongById(id);
+    await this._service.editSongById(id, request.payload);
 
     return {
       status: 'success',
