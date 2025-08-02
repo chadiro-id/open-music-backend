@@ -33,7 +33,7 @@ class SongsService {
   }
 
   async getSongs() {
-    const result = await this._pool.query('SELECT * FROM songs');
+    const result = await this._pool.query('SELECT id, title, performer FROM songs');
     return result.rows.map(mapSongDataToModel);
   }
 
@@ -60,11 +60,11 @@ class SongsService {
     albumId
   }) {
     const query = {
-      text: 'UPDATE songs SET(title, year, genre, performer, duration, album_id) VALUES($1, $2, $3, $4, $5, $6) WHERE id = $7 RETURNING id',
+      text: 'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, album_id = $6 WHERE id = $7 RETURNING id',
       values: [title, year, genre, performer, duration, albumId, id],
     };
 
-    const result = await this.query(query);
+    const result = await this._pool.query(query);
     if (!result.rows.length) {
       throw new NotFoundError('Gagal memperbarui lagu. Id tidak ditemukan');
     }
