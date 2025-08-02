@@ -33,12 +33,28 @@ class AlbumsService {
   // }
 
   async getAlbumById(id) {
-    const query = {
-      text: 'SELECT * FROM albums WHERE id = $1',
-      values: [id],
-    };
+    const queryText = `
+      SELECT
+        a.id,
+        a.name,
+        a.year,
+        COALESCE(
+          JSON_AGG(
+            JSONB_BUILD_OBJECT(
+              'id', s.id,
+              'title', s.title,
+              'performer', s.performer
+            )
+          )
+          FILTER (WHERE s.album_id IS NOT NULL), '[]'::json
+        ) AS songs
+      FROM albums a
+      LEFT JOIN songs s ON a.id = s.album_id
+      WHERE a.id = $1
+      GROUP BY a.id;
+    `;
 
-    const result = await this._pool.query(query);
+    const result = await this._pool.query(queryText, [id]);
     console.log(`[Albums Service] get album by id -> result count: ${result.rowCount}`);
     if (!result.rows.length) {
       throw new NotFoundError('Album tidak ditemukan');
