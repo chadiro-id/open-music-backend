@@ -4,7 +4,17 @@ import { defineConfig } from 'eslint/config';
 import daStyle from 'eslint-config-dicodingacademy';
 
 export default defineConfig([
-  daStyle,
-  { files: ['**/*.{js,mjs,cjs}'], plugins: { js }, extends: ['js/recommended'], languageOptions: { globals: globals.node } },
-  { files: ['**/*.js'], languageOptions: { sourceType: 'commonjs' } },
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    plugins: { js }, extends: ['js/recommended'],
+    languageOptions: { globals: globals.node },
+  },
+  {
+    files: ['**/*.js'],
+    extends: [daStyle],
+    languageOptions: { sourceType: 'commonjs' },
+    rules: {
+      'camelcase': ['error', { allow: ['album_id'] }],
+    },
+  },
 ]);
