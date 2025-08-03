@@ -8,7 +8,7 @@ class AlbumsService {
     const id = nanoid(16);
 
     const query = {
-      text: 'INSERT INTO albums VALUES(CONCAT(\'album-\', $1), $2, $3) RETURNING id',
+      text: 'INSERT INTO albums VALUES(CONCAT(\'album-\', $1::text), $2, $3) RETURNING id',
       values: [id, name, year],
     };
 

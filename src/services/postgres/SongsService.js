@@ -16,7 +16,7 @@ class SongsService {
     const id = nanoid(16);
 
     const query = {
-      text: 'INSERT INTO songs VALUES(CONCAT(\'song-\', $1), $2, $3, $4, $5, $6, $7) RETURNING id',
+      text: 'INSERT INTO songs VALUES(CONCAT(\'song-\', $1::text), $2, $3, $4, $5, $6, $7) RETURNING id',
       values: [id, title, year, genre, performer, duration, albumId]
     };
 
