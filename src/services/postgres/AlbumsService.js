@@ -1,12 +1,10 @@
-// const { Pool } = require('pg');
+const db = require('../../db');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
-const db = require('../../db');
 
 class AlbumsService {
   constructor() {
-    // db = new Pool();
   }
 
   async addAlbum({ name, year }) {
@@ -25,12 +23,6 @@ class AlbumsService {
 
     return result.rows[0].id;
   }
-
-  // async getAlbums() {
-  //   const result = await db.query('SELECT * FROM albums');
-  //   console.log(`[Albums Service] get albums -> result count: ${result.rowCount}`);
-  //   return result.rows;
-  // }
 
   async getAlbumById(id) {
     const queryText = `

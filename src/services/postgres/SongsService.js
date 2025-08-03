@@ -1,4 +1,3 @@
-// const { Pool } = require('pg');
 const db = require('../../db');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
@@ -7,7 +6,6 @@ const { mapSongDataToModel } = require('../../utils');
 
 class SongsService {
   constructor() {
-    // db = new Pool();
   }
 
   async addSong({
