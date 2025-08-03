@@ -5,9 +5,6 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const { mapSongDataToModel } = require('../../utils');
 
 class SongsService {
-  constructor() {
-  }
-
   async addSong({
     title,
     year,
