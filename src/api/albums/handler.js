@@ -14,7 +14,6 @@ class AlbumsHandler {
     const { name, year } = request.payload;
 
     const albumId = await this._service.addAlbum({ name, year });
-    console.log(`[Albums Handler] post album -> albumId: ${albumId}`);
 
     const response = h.response({
       status: 'success',
@@ -23,7 +22,6 @@ class AlbumsHandler {
       }
     });
     response.code(201);
-    console.log(`[Albums Handler] post album -> response: ${response.statusCode}`);
 
     return response;
   }
@@ -31,8 +29,6 @@ class AlbumsHandler {
   async getAlbumByIdHandler(request) {
     const { id } = request.params;
     const album = await this._service.getAlbumById(id);
-
-    console.log(`[Albums Handler] get album by id -> album: ${album}`);
 
     return {
       status: 'success',
