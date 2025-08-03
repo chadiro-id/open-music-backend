@@ -45,7 +45,7 @@ class AlbumsService {
 
     const result = await db.query(queryText, [id]);
     console.log(`[Albums Service] get album by id -> result count: ${result.rowCount}`);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Album tidak ditemukan');
     }
 
@@ -59,7 +59,7 @@ class AlbumsService {
     };
 
     const result = await db.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Gagal memperbarui album. Id tidak ditemukan');
     }
   }
@@ -72,7 +72,7 @@ class AlbumsService {
 
     const result = await db.query(query);
     console.log(`[Albums Service] delete album by id -> result count: ${result.rowCount}`);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Album gagal dihapus. Id tidak ditemukan');
     }
   }
