@@ -1,12 +1,12 @@
-const { Pool } = require('pg');
+// const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
-// const { mapAlbumDataToModel } = require('../../utils');
+const db = require('../../db');
 
 class AlbumsService {
   constructor() {
-    this._pool = new Pool();
+    // db = new Pool();
   }
 
   async addAlbum({ name, year }) {
@@ -17,7 +17,7 @@ class AlbumsService {
       values: [id, name, year],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     console.log(`[Albums Service] add album -> result count: ${result.rowCount}`);
     if (!result.rows[0].id) {
       throw new InvariantError('Album gagal ditambahkan');
@@ -27,7 +27,7 @@ class AlbumsService {
   }
 
   // async getAlbums() {
-  //   const result = await this._pool.query('SELECT * FROM albums');
+  //   const result = await db.query('SELECT * FROM albums');
   //   console.log(`[Albums Service] get albums -> result count: ${result.rowCount}`);
   //   return result.rows;
   // }
@@ -54,7 +54,7 @@ class AlbumsService {
       GROUP BY a.id;
     `;
 
-    const result = await this._pool.query(queryText, [id]);
+    const result = await db.query(queryText, [id]);
     console.log(`[Albums Service] get album by id -> result count: ${result.rowCount}`);
     if (!result.rows.length) {
       throw new NotFoundError('Album tidak ditemukan');
@@ -69,7 +69,7 @@ class AlbumsService {
       values: [name, year, id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (!result.rows.length) {
       throw new NotFoundError('Gagal memperbarui album. Id tidak ditemukan');
     }
@@ -81,7 +81,7 @@ class AlbumsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     console.log(`[Albums Service] delete album by id -> result count: ${result.rowCount}`);
     if (!result.rows.length) {
       throw new NotFoundError('Album gagal dihapus. Id tidak ditemukan');
