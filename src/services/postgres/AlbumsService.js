@@ -14,7 +14,7 @@ class AlbumsService {
 
     const result = await db.query(query);
     console.log(`[Albums Service] add album -> result count: ${result.rowCount}`);
-    if (!result.rows[0].id) {
+    if (!result.rows[0]?.id) {
       throw new InvariantError('Album gagal ditambahkan');
     }
 
