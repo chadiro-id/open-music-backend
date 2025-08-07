@@ -13,13 +13,11 @@ exports.up = (pgm) => {
     cascade: true,
   });
 
-  // membuat user baru.
-  pgm.sql("INSERT INTO albums (id, name, year) VALUES ('no_albums', 'no_albums', 0)");
+  pgm.sql("INSERT INTO albums (id, name, year) VALUES ('song_without_album', 'song_without_album', 0)");
 
-  // mengubah nilai owner pada note yang owner-nya bernilai NULL
-  pgm.sql("UPDATE songs SET album_id = 'no_albums' WHERE album_id IS NULL");
+  pgm.sql("UPDATE songs SET album_id = 'song_without_album' WHERE album_id IS NULL");
 
-  pgm.addConstraint('songs', 'fk_album_id', {
+  pgm.addConstraint('songs', 'songs_album_id_fkey', {
     foreignKeys: {
       columns: 'album_id',
       references: 'albums(id)',
@@ -35,16 +33,15 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropConstraint('songs', 'fk_album_id', {
+  pgm.dropConstraint('songs', 'songs_album_id_fkey', {
     ifExists: true,
     cascade: true,
   });
 
-  // mengubah nilai owner old_notes pada note menjadi NULL
-  pgm.sql("UPDATE songs SET album_id = NULL WHERE album_id = 'no_albums'");
+  pgm.sql("UPDATE songs SET album_id = NULL WHERE album_id = 'song_without_album'");
 
   // menghapus user baru.
-  pgm.sql("DELETE FROM albums WHERE id = 'no_albums'");
+  pgm.sql("DELETE FROM albums WHERE id = 'song_without_album'");
 
   pgm.addConstraint('songs', 'fk_album_id', {
     foreignKeys: {
