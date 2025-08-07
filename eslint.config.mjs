@@ -22,7 +22,7 @@ export default defineConfig([
       'camelcase': [
         'error',
         {
-          allow: ['album_id', 'song_id', 'playlist_id']
+          allow: ['album_id', 'song_id', 'playlist_id', 'user_id']
         }
       ],
     },
