@@ -8,7 +8,20 @@ class AuthenticationsService {
       values: [token],
     };
 
-    await this._pool.query(query);
+    await db.query(query);
+  }
+
+  async verifyRefreshToken(token) {
+    const query = {
+      text: 'SELECT token FROM authentications WHERE token = $1',
+      values: [token],
+    };
+
+    const result = await db.query(query);
+
+    if (!result.rows.length) {
+      throw new InvariantError('Refresh token tidak valid');
+    }
   }
 }
 
