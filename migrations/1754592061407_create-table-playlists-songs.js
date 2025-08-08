@@ -51,5 +51,20 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
+  pgm.dropConstraint('playlists_songs', 'playlists_songs_song_id_fkey', {
+    ifExists: true,
+    cascade: true,
+  });
+
+  pgm.dropConstraint('playlists_songs', 'playlists_songs_playlist_id_fkey', {
+    ifExists: true,
+    cascade: true,
+  });
+
+  pgm.dropConstraint('playlists_songs', 'playlists_songs_playlist_id_song_id_key', {
+    ifExists: true,
+    cascade: true,
+  });
+
   pgm.dropTable('playlists_songs');
 };
