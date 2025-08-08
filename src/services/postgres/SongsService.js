@@ -1,4 +1,4 @@
-const db = require('../../db');
+const db = require('../../db/postgres');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
