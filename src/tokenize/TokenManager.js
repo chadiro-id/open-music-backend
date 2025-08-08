@@ -8,6 +8,7 @@ const TokenManager = {
     try {
       const artifacts = Jwt.token.decode(refreshToken);
       Jwt.token.verifySignature(artifacts, process.env.REFRESH_TOKEN_KEY);
+
       const { payload } = artifacts.decoded;
       return payload;
     } catch (error) {
