@@ -54,6 +54,26 @@ class PlaylistsHandler {
       message: 'Playlist berhasil dihapus',
     };
   }
+
+  async postPlaylistSongHandler(request, h) {
+    this._validator.validatePlaylistSongPayload(request.payload);
+
+    const { id } = request.params;
+    const { songId } = request.payload;
+
+    const { id: credentialId } = request.auth.credentials;
+
+    await this._playlistsService.verifyPlaylistOwner(id, credentialId);
+    await this._playlistSongsService.addPlaylistSong({ id, songId });
+
+    const response = h.response({
+      status: 'success',
+      message: 'Lagu berhasil ditambahkan ke playlist',
+    });
+
+    response.code(201);
+    return response;
+  }
 }
 
 module.exports = PlaylistsHandler;
