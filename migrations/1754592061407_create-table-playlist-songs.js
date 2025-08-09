@@ -4,7 +4,7 @@
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-  pgm.createTable('playlists_songs', {
+  pgm.createTable('playlist_songs', {
     id: {
       type: 'VARCHAR(50)',
       primaryKey: true,
@@ -19,14 +19,14 @@ exports.up = (pgm) => {
     }
   });
 
-  pgm.addConstraint('playlists_songs', 'playlists_songs_playlist_id_song_id_key', {
+  pgm.addConstraint('playlist_songs', 'playlist_songs_playlist_id_song_id_key', {
     unique: [
       'playlist_id',
       'song_id'
     ],
   });
 
-  pgm.addConstraint('playlists_songs', 'playlists_songs_playlist_id_fkey', {
+  pgm.addConstraint('playlist_songs', 'playlist_songs_playlist_id_fkey', {
     foreignKeys: {
       columns: 'playlist_id',
       references: 'playlists(id)',
@@ -35,7 +35,7 @@ exports.up = (pgm) => {
     },
   });
 
-  pgm.addConstraint('playlists_songs', 'playlists_songs_song_id_fkey', {
+  pgm.addConstraint('playlist_songs', 'playlist_songs_song_id_fkey', {
     foreignKeys: {
       columns: 'song_id',
       references: 'songs(id)',
@@ -51,20 +51,20 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropConstraint('playlists_songs', 'playlists_songs_song_id_fkey', {
+  pgm.dropConstraint('playlist_songs', 'playlist_songs_song_id_fkey', {
     ifExists: true,
     cascade: true,
   });
 
-  pgm.dropConstraint('playlists_songs', 'playlists_songs_playlist_id_fkey', {
+  pgm.dropConstraint('playlist_songs', 'playlist_songs_playlist_id_fkey', {
     ifExists: true,
     cascade: true,
   });
 
-  pgm.dropConstraint('playlists_songs', 'playlists_songs_playlist_id_song_id_key', {
+  pgm.dropConstraint('playlist_songs', 'playlist_songs_playlist_id_song_id_key', {
     ifExists: true,
     cascade: true,
   });
 
-  pgm.dropTable('playlists_songs');
+  pgm.dropTable('playlist_songs');
 };
