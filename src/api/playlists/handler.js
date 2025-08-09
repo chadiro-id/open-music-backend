@@ -76,6 +76,24 @@ class PlaylistsHandler {
     response.code(201);
     return response;
   }
+
+  async getPlaylistSongsHandler(request) {
+    const { id } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+
+    await this._playlistsService.verifyPlaylistOwner(id, credentialId);
+
+    const playlist = await this._playlistsService.getPlaylistById(id);
+    const songs = await this._playlistSongsService.getPlaylistSongs(id);
+    playlist.songs = songs;
+
+    return {
+      status: 'success',
+      data: {
+        playlist,
+      },
+    };
+  }
 }
 
 module.exports = PlaylistsHandler;

@@ -35,6 +35,23 @@ class PlaylistsService {
     return result.rows;
   }
 
+  async getPlaylistById(id) {
+    const query = {
+      text: `SELECT p.id, p.name, u.username
+      FROM playlists p
+      LEFT JOIN users u ON u.id = p.owner
+      WHERE p.id = $1`,
+      values: [id],
+    };
+
+    const result = await db.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError('Playlist tidak ditemukan');
+    }
+
+    return result.rows[0];
+  }
+
   async deletePlaylistById(id) {
     const query = {
       text: 'DELETE FROM playlists WHERE id = $1 RETURNING id',
