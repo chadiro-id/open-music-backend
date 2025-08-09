@@ -18,6 +18,15 @@ class PlaylistsService {
 
     return result.rows[0].id;
   }
+
+  async getPlaylists() {
+    const query = {
+      text: 'SELECT * FROM playlists',
+    };
+
+    const result = await db.query(query);
+    return result.rows;
+  }
 }
 
 module.exports = PlaylistsService;
