@@ -1,8 +1,9 @@
 const autoBind = require('auto-bind');
 
 class PlaylistsHandler {
-  constructor(playlistsService, playlistSongsService, validator) {
+  constructor(playlistsService, songsService, playlistSongsService, validator) {
     this._playlistsService = playlistsService;
+    this._songsService = songsService;
     this._playlistSongsService = playlistSongsService;
     this._validator = validator;
 
@@ -64,7 +65,8 @@ class PlaylistsHandler {
     const { id: credentialId } = request.auth.credentials;
 
     await this._playlistsService.verifyPlaylistOwner(id, credentialId);
-    await this._playlistSongsService.addPlaylistSong({ id, songId });
+    await this._songsService.verifySongById(songId);
+    await this._playlistSongsService.addPlaylistSong({ playlistId: id, songId });
 
     const response = h.response({
       status: 'success',
