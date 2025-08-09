@@ -2,12 +2,12 @@ const db = require('../../db/postgres');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 
-class PlaylistsSongsService {
+class PlaylistSongsService {
   async addPlaylistSong({ playlistId, songId }) {
     const id = `ps-${nanoid(16)}`;
 
     const query = {
-      text: 'INSERT INTO playlists_songs VALUES ($1, $2, $3) RETURNING id',
+      text: 'INSERT INTO playlist_songs VALUES ($1, $2, $3) RETURNING id',
       values: [id, playlistId, songId],
     };
 
@@ -21,7 +21,7 @@ class PlaylistsSongsService {
 
   async getPlaylistSongs(playlistId) {
     const query = {
-      text: 'SELECT * FROM playlists_songs WHERE playlist_id = $1',
+      text: 'SELECT * FROM playlist_songs WHERE playlist_id = $1',
       values: [playlistId],
     };
 
@@ -31,7 +31,7 @@ class PlaylistsSongsService {
 
   async deletePlaylistSong({ playlistId, songId }) {
     const query = {
-      text: 'DELETE FROM playlists_songs WHERE playlist_id = $1 AND song_id = $2 RETURNING id',
+      text: 'DELETE FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2 RETURNING id',
       values: [playlistId, songId],
     };
 
@@ -43,7 +43,7 @@ class PlaylistsSongsService {
 
   async verifyPlaylistSong({ playlistId, songId }) {
     const query = {
-      text: 'SELECT * FROM playlists_songs WHERE playlist_id = $1 AND song_id = $2',
+      text: 'SELECT * FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2',
       values: [playlistId, songId],
     };
 
@@ -54,4 +54,4 @@ class PlaylistsSongsService {
   }
 }
 
-module.exports = PlaylistsSongsService;
+module.exports = PlaylistSongsService;
