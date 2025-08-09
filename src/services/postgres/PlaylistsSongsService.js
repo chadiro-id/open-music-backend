@@ -18,6 +18,18 @@ class PlaylistsSongsService {
 
     return result.rows[0].id;
   }
+
+  async deletePlaylistSong({ playlistId, songId }) {
+    const query = {
+      text: 'DELETE FROM playlists_songs WHERE playlist_id = $1 AND song_id = $2 RETURNING id',
+      values: [playlistId, songId],
+    };
+
+    const result = await db.query(query);
+    if (!result.rowCount) {
+      throw new InvariantError('Playlist song gagal dihapus');
+    }
+  }
 }
 
 module.exports = PlaylistsSongsService;
