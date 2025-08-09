@@ -21,9 +21,12 @@ class PlaylistsService {
     return result.rows[0].id;
   }
 
-  async getPlaylists() {
+  async getPlaylists(owner) {
     const query = {
-      text: 'SELECT * FROM playlists',
+      text: `SELECT p.* FROM playlists p
+      WHERE p.owner = $1
+      `,
+      values: [owner],
     };
 
     const result = await db.query(query);
