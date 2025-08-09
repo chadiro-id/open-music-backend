@@ -28,6 +28,19 @@ class PlaylistsHandler {
     return response;
   }
 
+  async getPlaylistsHandler(request) {
+    const { id: credentialId } = request.auth.credentials;
+
+    const playlists = await this._service.getPlaylists(credentialId);
+
+    return {
+      status: 'success',
+      data: {
+        playlists,
+      },
+    };
+  }
+
   async deletePlaylistByIdHandler(request) {
     const { id } = request.params;
     const { id: credentialId } = request.auth.credentials;
