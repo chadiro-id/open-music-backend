@@ -13,7 +13,7 @@ class UsersService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const query = {
-      text: 'INSERT INTO users VALUES (CONCAT(\'user-\', $1::text, $2, $3, $4) RETURNING id',
+      text: 'INSERT INTO users VALUES (CONCAT(\'user-\', $1::text), $2, $3, $4) RETURNING id',
       values: [id, username, hashedPassword, fullname],
     };
 
