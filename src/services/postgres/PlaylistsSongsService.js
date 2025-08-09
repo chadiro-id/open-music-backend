@@ -30,6 +30,18 @@ class PlaylistsSongsService {
       throw new InvariantError('Playlist song gagal dihapus');
     }
   }
+
+  async verifyPlaylistSong({ playlistId, songId }) {
+    const query = {
+      text: 'SELECT * FROM playlists_songs WHERE playlist_id = $1 AND song_id = $2',
+      values: [playlistId, songId],
+    };
+
+    const result = await db.query(query);
+    if (!result.rowCount) {
+      throw new InvariantError('Playlist song gagal diverifikasi');
+    }
+  }
 }
 
 module.exports = PlaylistsSongsService;
