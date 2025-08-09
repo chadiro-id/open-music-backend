@@ -2,6 +2,7 @@ const db = require('../../db/postgres');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
   async addPlaylist({ name, owner }) {
@@ -38,6 +39,23 @@ class PlaylistsService {
     const result = await db.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Playlist gagal dihapus. Id tidak ditemukan');
+    }
+  }
+
+  async verifyPlaylistOwner(id, owner) {
+    const query = {
+      text: 'SELECT * FROM playlist WHERE id = $1',
+      values: [id],
+    };
+
+    const result = await db.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError('Playlist tidak ditemukan');
+    }
+
+    const playlist = result.rows[0];
+    if (playlist.owner !== owner) {
+      throw new AuthorizationError('Anda tidak memiliki hak untuk mengakses resource ini');
     }
   }
 }
