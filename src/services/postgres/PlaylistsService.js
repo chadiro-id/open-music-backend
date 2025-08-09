@@ -1,6 +1,7 @@
 const db = require('../../db/postgres');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
+const NotFoundError = require('../../exceptions/NotFoundError');
 
 class PlaylistsService {
   async addPlaylist({ name, owner }) {
@@ -26,6 +27,18 @@ class PlaylistsService {
 
     const result = await db.query(query);
     return result.rows;
+  }
+
+  async deletePlaylistById(id) {
+    const query = {
+      text: 'DELETE FROM playlists WHERE id = $1 RETURNING id',
+      values: [id],
+    };
+
+    const result = await db.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError('Playlist gagal dihapus. Id tidak ditemukan');
+    }
   }
 }
 
