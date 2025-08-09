@@ -71,6 +71,18 @@ class UsersService {
 
     return id;
   }
+
+  async verifyUserById(id) {
+    const query = {
+      text: 'SELECT id FROM users WHERE id = $1',
+      values: [id],
+    };
+
+    const result = await db.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError('Lagu tidak ditemukan');
+    }
+  }
 }
 
 module.exports = UsersService;
