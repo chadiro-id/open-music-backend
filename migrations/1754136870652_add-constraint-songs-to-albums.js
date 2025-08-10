@@ -24,12 +24,12 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
+  pgm.dropIndex('songs', 'album_id', {
+    name: 'idx_song_by_album_id',
+  });
+
   pgm.dropConstraint('songs', 'fk_album_id', {
     ifExists: true,
     cascade: true,
-  });
-
-  pgm.dropIndex('songs', 'album_id', {
-    name: 'idx_song_by_album_id',
   });
 };
