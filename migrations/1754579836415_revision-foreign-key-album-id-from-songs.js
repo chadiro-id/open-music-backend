@@ -40,7 +40,6 @@ exports.down = (pgm) => {
 
   pgm.sql("UPDATE songs SET album_id = NULL WHERE album_id = 'song_without_album'");
 
-  // menghapus user baru.
   pgm.sql("DELETE FROM albums WHERE id = 'song_without_album'");
 
   pgm.addConstraint('songs', 'fk_album_id', {
