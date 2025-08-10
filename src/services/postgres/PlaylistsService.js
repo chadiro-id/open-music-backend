@@ -25,7 +25,7 @@ class PlaylistsService {
     return result.rows[0].id;
   }
 
-  async getPlaylists(owner) {
+  async getPlaylists(credentialId) {
     const query = {
       text: `SELECT p.id, p.name, u.username
       FROM playlists p
@@ -37,7 +37,7 @@ class PlaylistsService {
       JOIN users u ON relationships.user_id = u.id
       WHERE p.id IS NOT NULL AND p.name IS NOT NULL AND u.username IS NOT NULL;
       `,
-      values: [owner],
+      values: [credentialId],
     };
 
     const result = await db.query(query);
