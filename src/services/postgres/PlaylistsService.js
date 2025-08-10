@@ -29,8 +29,13 @@ class PlaylistsService {
     const query = {
       text: `SELECT p.id, p.name, u.username
       FROM playlists p
-      LEFT JOIN users u ON u.id = p.owner
-      WHERE p.owner = $1
+      JOIN (
+        SELECT playlist_id, user_id FROM collaborations WHERE user_id = $1
+        UNION
+        SELECT id AS playlist_id, owner AS user_id FROM playlists WHERE owner = $1
+      ) AS relationships ON p.id = relationships.playlist_id
+      JOIN users u ON relationships.user_id = u.id
+      WHERE p.id IS NOT NULL AND p.name IS NOT NULL AND u.username IS NOT NULL;
       `,
       values: [owner],
     };
