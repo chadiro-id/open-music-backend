@@ -3,20 +3,35 @@ const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 
 class PlaylistSongsService {
-  async addPlaylistSong({ playlistId, songId }) {
-    const id = `ps-${nanoid(16)}`;
+  async addPlaylistSong(userId, { playlistId, songId }) {
+    const client = await db.getClient();
 
-    const query = {
-      text: 'INSERT INTO playlist_songs VALUES ($1, $2, $3) RETURNING id',
-      values: [id, playlistId, songId],
-    };
+    try {
+      await client.query('BEGIN');
+      const playlistSongId = `ps-${nanoid(16)}`;
 
-    const result = await db.query(query);
-    if (!result.rows[0]?.id) {
-      throw new InvariantError('Playlist song gagal ditambahkan');
+      const insertSongResult = await client.query(
+        'INSERT INTO playlist_songs VALUES ($1, $2, $3) RETURNING id',
+        [playlistSongId, playlistId, songId]
+      );
+
+      const songActivityId = `psa-${nanoid(16)}`;
+      const time = new Date();
+
+      await client.query(
+        'INSERT INTO playlist_song_activities VALUES ($1, $2, $3, $4, $5, $6)',
+        [songActivityId, playlistId, songId, userId, 'add', time]
+      );
+
+      await client.query('COMMIT');
+      return insertSongResult.rows[0].id;
+    } catch (error) {
+      console.error(error);
+      await client.query('ROLLBACK');
+      throw new InvariantError('Lagu gagal ditambahkan ke daftar putar');
+    } finally {
+      client.release();
     }
-
-    return result.rows[0].id;
   }
 
   async getPlaylistSongs(playlistId) {
@@ -33,15 +48,30 @@ class PlaylistSongsService {
     return result.rows;
   }
 
-  async deletePlaylistSong({ playlistId, songId }) {
-    const query = {
-      text: 'DELETE FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2 RETURNING id',
-      values: [playlistId, songId],
-    };
+  async deletePlaylistSong(userId, { playlistId, songId }) {
+    const client = await db.getClient();
+    try {
+      await client.query('BEGIN');
 
-    const result = await db.query(query);
-    if (!result.rowCount) {
-      throw new InvariantError('Playlist song gagal dihapus');
+      await client.query(
+        'DELETE FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2',
+        [playlistId, songId]
+      );
+
+      const songActivityId = `psa-${nanoid(16)}`;
+      const time = new Date();
+      await client.query(
+        'INSERT INTO playlist_song_activities VALUES ($1, $2, $3, $4, $5, $6)',
+        [songActivityId, playlistId, songId, userId, 'delete', time]
+      );
+
+      await client.query('COMMIT');
+    } catch (error) {
+      console.error(error);
+      await client.query('ROLLBACK');
+      throw new InvariantError('Lagu gagal dihapus dari daftar putar');
+    } finally {
+      client.release();
     }
   }
 
@@ -55,6 +85,21 @@ class PlaylistSongsService {
     if (!result.rowCount) {
       throw new InvariantError('Playlist song gagal diverifikasi');
     }
+  }
+
+  async getPlaylistSongActivities(playlistId) {
+    const query = {
+      text: `SELECT u.username, s.title, psa.action, psa.time
+      FROM playlist_song_activities psa
+      LEFT JOIN users u ON u.id = psa.user_id
+      LEFT JOIN songs s ON s.id = psa.song_id
+      WHERE psa.playlist_id = $1
+      ORDER BY time`,
+      values: [playlistId],
+    };
+
+    const result = await db.query(query);
+    return result.rows;
   }
 }
 
