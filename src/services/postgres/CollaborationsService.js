@@ -38,7 +38,7 @@ class CollaborationsService {
       values: [playlistId, userId],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Kolaborasi gagal diverifikasi');
