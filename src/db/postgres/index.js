@@ -6,6 +6,6 @@ exports.query = (text, params) => {
   return pool.query(text, params);
 };
 
-exports.client = () => {
+exports.getClient = () => {
   return pool.connect();
 };
