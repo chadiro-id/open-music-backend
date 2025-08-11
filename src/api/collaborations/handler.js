@@ -1,13 +1,15 @@
 const autoBind = require('auto-bind');
 
 class CollborationsHandler {
-  constructor(services, validator) {
-    [
-      this._collaborationsService,
-      this._playlistsService,
-      this._usersService
-    ] = services;
-
+  constructor(
+    collaborationsService,
+    playlistsService,
+    usersService,
+    validator
+  ) {
+    this._collaborationsService = collaborationsService;
+    this._playlistsService = playlistsService;
+    this._usersService = usersService;
     this._validator = validator;
 
     autoBind(this);
