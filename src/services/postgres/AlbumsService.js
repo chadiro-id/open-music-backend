@@ -22,24 +22,24 @@ class AlbumsService {
 
   async getAlbumById(id) {
     const queryText = `
-      SELECT
-        a.id,
-        a.name,
-        a.year,
-        COALESCE(
-          JSON_AGG(
-            JSONB_BUILD_OBJECT(
-              'id', s.id,
-              'title', s.title,
-              'performer', s.performer
-            )
+    SELECT
+      a.id,
+      a.name,
+      a.year,
+      COALESCE(
+        JSON_AGG(
+          JSONB_BUILD_OBJECT(
+            'id', s.id,
+            'title', s.title,
+            'performer', s.performer
           )
-          FILTER (WHERE s.album_id IS NOT NULL), '[]'::json
-        ) AS songs
-      FROM albums a
-      LEFT JOIN songs s ON a.id = s.album_id
-      WHERE a.id = $1
-      GROUP BY a.id;
+        )
+        FILTER (WHERE s.album_id IS NOT NULL), '[]'::json
+      ) AS songs
+    FROM albums a
+    LEFT JOIN songs s ON a.id = s.album_id
+    WHERE a.id = $1
+    GROUP BY a.id;
     `;
 
     const result = await db.query(queryText, [id]);
