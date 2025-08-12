@@ -35,8 +35,8 @@ class SongsHandler {
         songId,
       }
     });
-    response.code(201);
 
+    response.code(201);
     return response;
   }
 
