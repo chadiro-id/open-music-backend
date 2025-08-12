@@ -83,7 +83,7 @@ class PlaylistsHandler {
     return response;
   }
 
-  async getSongsFromPlaylistHandler(request) {
+  async getPlaylistWithSongsHandler(request) {
     const { id: playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
