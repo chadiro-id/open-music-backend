@@ -3,7 +3,7 @@ const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 
 class PlaylistSongsService {
-  async addPlaylistSong(userId, { playlistId, songId }) {
+  async addSongToPlaylist(userId, { playlistId, songId }) {
     const client = await db.getClient();
     try {
       await client.query('BEGIN');
@@ -33,7 +33,7 @@ class PlaylistSongsService {
     }
   }
 
-  async getPlaylistSongs(playlistId) {
+  async getSongsFromPlaylist(playlistId) {
     const query = {
       text: `SELECT s.id, s.title, s.performer
       FROM playlist_songs ps
@@ -47,7 +47,7 @@ class PlaylistSongsService {
     return result.rows;
   }
 
-  async deletePlaylistSong(userId, { playlistId, songId }) {
+  async deleteSongFromPlaylist(userId, { playlistId, songId }) {
     const client = await db.getClient();
     try {
       await client.query('BEGIN');
@@ -73,7 +73,7 @@ class PlaylistSongsService {
     }
   }
 
-  async verifyPlaylistSong({ playlistId, songId }) {
+  async verifySongFromPlaylist({ playlistId, songId }) {
     const query = {
       text: 'SELECT * FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2',
       values: [playlistId, songId],
@@ -85,7 +85,7 @@ class PlaylistSongsService {
     }
   }
 
-  async getPlaylistSongActivities(playlistId) {
+  async getSongActivitiesFromPlaylist(playlistId) {
     const query = {
       text: `SELECT u.username, s.title, psa.action, psa.time
       FROM playlist_song_activities psa
