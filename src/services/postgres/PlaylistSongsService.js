@@ -5,7 +5,6 @@ const InvariantError = require('../../exceptions/InvariantError');
 class PlaylistSongsService {
   async addPlaylistSong(userId, { playlistId, songId }) {
     const client = await db.getClient();
-
     try {
       await client.query('BEGIN');
       const playlistSongId = `ps-${nanoid(16)}`;
@@ -52,7 +51,6 @@ class PlaylistSongsService {
     const client = await db.getClient();
     try {
       await client.query('BEGIN');
-
       await client.query(
         'DELETE FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2',
         [playlistId, songId]
@@ -60,11 +58,11 @@ class PlaylistSongsService {
 
       const songActivityId = `psa-${nanoid(16)}`;
       const time = new Date();
+
       await client.query(
         'INSERT INTO playlist_song_activities VALUES ($1, $2, $3, $4, $5, $6)',
         [songActivityId, playlistId, songId, userId, 'delete', time]
       );
-
       await client.query('COMMIT');
     } catch (error) {
       console.error(error);
