@@ -71,6 +71,7 @@ class PlaylistsHandler {
 
     await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId);
     await this._songsService.verifySongById(songId);
+
     await this._playlistSongsService.addPlaylistSong(credentialId, { playlistId, songId });
 
     const response = h.response({
@@ -90,6 +91,7 @@ class PlaylistsHandler {
 
     const playlist = await this._playlistsService.getPlaylistById(playlistId);
     const songs = await this._playlistSongsService.getPlaylistSongs(playlistId);
+
     playlist.songs = songs;
 
     return {
