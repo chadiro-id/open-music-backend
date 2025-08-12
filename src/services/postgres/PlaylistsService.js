@@ -19,7 +19,7 @@ class PlaylistsService {
 
     const result = await db.query(query);
     if (!result.rows[0]?.id) {
-      throw new InvariantError('Playlist gagal ditambahkan');
+      throw new InvariantError('Daftar putar gagal ditambahkan');
     }
 
     return result.rows[0].id;
@@ -52,7 +52,7 @@ class PlaylistsService {
 
     const result = await db.query(query);
     if (!result.rowCount) {
-      throw new NotFoundError('Playlist tidak ditemukan');
+      throw new NotFoundError('Daftar putar tidak ditemukan');
     }
 
     return result.rows[0];
@@ -66,7 +66,7 @@ class PlaylistsService {
 
     const result = await db.query(query);
     if (!result.rowCount) {
-      throw new NotFoundError('Playlist gagal dihapus. Id tidak ditemukan');
+      throw new NotFoundError('Daftar putar gagal dihapus. Id tidak ditemukan');
     }
   }
 
@@ -78,7 +78,7 @@ class PlaylistsService {
 
     const result = await db.query(query);
     if (!result.rowCount) {
-      throw new NotFoundError('Playlist tidak ditemukan');
+      throw new NotFoundError('Daftar putar tidak ditemukan');
     }
 
     const playlist = result.rows[0];
