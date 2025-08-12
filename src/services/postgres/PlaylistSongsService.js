@@ -73,18 +73,6 @@ class PlaylistSongsService {
     }
   }
 
-  async verifySongFromPlaylist({ playlistId, songId }) {
-    const query = {
-      text: 'SELECT * FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2',
-      values: [playlistId, songId],
-    };
-
-    const result = await db.query(query);
-    if (!result.rowCount) {
-      throw new InvariantError('Playlist song gagal diverifikasi');
-    }
-  }
-
   async getSongActivitiesFromPlaylist(playlistId) {
     const query = {
       text: `SELECT u.username, s.title, psa.action, psa.time
