@@ -9,7 +9,7 @@ class ExportsHandler {
   }
 
   async postExportPlaylistsHandler(request, h) {
-    this._validator.validateExportPlaylistsPayload(request.payload);
+    this._validator.validateExportPlaylistPayload(request.payload);
 
     const message = {
       userId: request.auth.credentials.id,
