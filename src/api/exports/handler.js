@@ -16,7 +16,7 @@ class ExportsHandler {
   async postExportPlaylistHandler(request, h) {
     this._validator.validateExportPlaylistPayload(request.payload);
 
-    const { id: playlistId } = request.params;
+    const { playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
     await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
