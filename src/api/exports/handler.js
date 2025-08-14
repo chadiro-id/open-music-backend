@@ -8,7 +8,7 @@ class ExportsHandler {
     autoBind(this);
   }
 
-  async postExportPlaylistsHandler(request, h) {
+  async postExportPlaylistHandler(request, h) {
     this._validator.validateExportPlaylistPayload(request.payload);
 
     const message = {
