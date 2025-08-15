@@ -28,8 +28,8 @@ exports.up = (pgm) => {
     },
   });
 
-  pgm.addConstraint('album_covers', 'album_covers_album_id_cover_key', {
-    unique: ['album_id', 'cover'],
+  pgm.addConstraint('album_covers', 'album_covers_album_id_key', {
+    unique: 'album_id',
   });
 };
 
@@ -39,7 +39,7 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropConstraint('album_covers', 'album_covers_album_id_cover_key', {
+  pgm.dropConstraint('album_covers', 'album_covers_album_id_key', {
     ifExists: true,
     cascade: true,
   });
