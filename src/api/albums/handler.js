@@ -4,11 +4,13 @@ class AlbumsHandler {
   constructor(
     albumsService,
     albumCoversService,
+    userAlbumLikesService,
     albumsValidator,
     uploadsValidator
   ) {
     this._albumsService = albumsService;
     this._albumCoversService = albumCoversService;
+    this._userAlbumLikesService = userAlbumLikesService;
     this._albumsValidator = albumsValidator;
     this._uploadsValidator = uploadsValidator;
 
@@ -83,6 +85,21 @@ class AlbumsHandler {
     const response = h.response({
       status: 'success',
       message: 'Sampul berhasil diunggah'
+    });
+
+    response.code(201);
+    return response;
+  }
+
+  async postLikeToAlbumHandler(request, h) {
+    const { id: albumId } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+
+    await this._userAlbumLikesService.addLikeToAlbum({ userId: credentialId, albumId });
+
+    const response = h.response({
+      status: 'success',
+      message: 'Like berhasil ditambahkan ke album'
     });
 
     response.code(201);
