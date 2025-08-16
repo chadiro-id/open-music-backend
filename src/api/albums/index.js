@@ -7,12 +7,14 @@ module.exports = {
   register: async (server, {
     albumsService,
     albumCoversService,
+    userAlbumLikesService,
     albumsValidator,
     uploadsValidator
   }) => {
     const handler = new AlbumsHandler(
       albumsService,
       albumCoversService,
+      userAlbumLikesService,
       albumsValidator,
       uploadsValidator
     );
