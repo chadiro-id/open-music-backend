@@ -95,6 +95,8 @@ class AlbumsHandler {
     const { id: albumId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
+    await this._userAlbumLikesService.verifyLikeFromAlbumByUserId(credentialId, albumId);
+
     await this._userAlbumLikesService.addLikeToAlbum({ userId: credentialId, albumId });
 
     const response = h.response({
