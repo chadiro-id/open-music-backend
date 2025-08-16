@@ -42,12 +42,12 @@ const StorageService = require('./services/S3/StorageService');
 
 const init = async () => {
   const storageService = new StorageService();
-  const albumCoversService = new AlbumCoversService(storageService);
-  const albumsService = new AlbumsService(albumCoversService);
-  const userAlbumLikesService = new UserAlbumLikesService();
-  const songsService = new SongsService();
-  const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
+  const usersService = new UsersService();
+  const songsService = new SongsService();
+  const albumCoversService = new AlbumCoversService(storageService);
+  const albumsService = new AlbumsService(albumCoversService, songsService);
+  const userAlbumLikesService = new UserAlbumLikesService();
   const collaborationsService = new CollaborationsService();
   const playlistsService = new PlaylistsService(collaborationsService);
   const playlistSongsService = new PlaylistSongsService();
