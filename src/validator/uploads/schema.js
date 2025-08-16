@@ -11,7 +11,7 @@ const imageTypes = [
 ];
 
 const ImageHeadersSchema = Joi.object({
-  'content-type': Joi.string().valid(imageTypes).required(),
+  'content-type': Joi.string().valid(...imageTypes).required(),
 }).unknown();
 
 module.exports = { ImageHeadersSchema };
