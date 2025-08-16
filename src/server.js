@@ -7,6 +7,7 @@ const ClientError = require('./exceptions/ClientError');
 
 const albums = require('./api/albums');
 const AlbumsService = require('./services/postgres/AlbumsService');
+const AlbumCoversService = require('./services/postgres/AlbumCoversService');
 const AlbumsValidator = require('./validator/albums');
 
 const songs = require('./api/songs');
@@ -35,8 +36,13 @@ const _exports = require('./api/exports');
 const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports');
 
+const UploadsValidator = require('./validator/uploads');
+const StorageService = require('./services/S3/StorageService');
+
 const init = async () => {
-  const albumsService = new AlbumsService();
+  const storageService = new StorageService();
+  const albumCoversService = new AlbumCoversService(storageService);
+  const albumsService = new AlbumsService(albumCoversService);
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
@@ -80,8 +86,10 @@ const init = async () => {
     {
       plugin: albums,
       options: {
-        service: albumsService,
-        validator: AlbumsValidator,
+        albumsService,
+        albumCoversService,
+        albumsValidator: AlbumsValidator,
+        uploadsValidator: UploadsValidator,
       },
     },
     {
