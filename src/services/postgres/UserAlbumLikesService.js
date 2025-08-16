@@ -1,5 +1,6 @@
 const db = require('../../db/postgres');
 const InvariantError = require('../../exceptions/InvariantError');
+const NotFoundError = require('../../exceptions/NotFoundError');
 
 class UserAlbumLikesService {
   async addLikeToAlbum({ userId, albumId }) {
@@ -25,7 +26,15 @@ class UserAlbumLikesService {
   }
 
   async deleteLikeFromAlbum({ userId, albumId }) {
-    console.log(userId, albumId);
+    const query = {
+      text: 'DELETE FROM user_album_likes WHERE user_id = $1 AND album_id = $2',
+      values: [userId, albumId],
+    };
+
+    const result = await db.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError('Like gagal dihapus. Id tidak ditemukan');
+    }
   }
 }
 
