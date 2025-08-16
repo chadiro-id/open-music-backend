@@ -44,7 +44,17 @@ class SongsService {
     }
 
     const result = await db.query(queryText, values);
-    return result.rows.map(mapSongDataToModel);
+    return result.rows;
+  }
+
+  async getSongsOfAlbum(albumId) {
+    const query = {
+      text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
+      values: [albumId],
+    };
+
+    const result = await db.query(query);
+    return result.rows;
   }
 
   async getSongById(id) {
