@@ -1,4 +1,5 @@
 const db = require('../../db/postgres');
+const ClientError = require('../../exceptions/ClientError');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
@@ -34,6 +35,18 @@ class UserAlbumLikesService {
     const result = await db.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Like gagal dihapus. Id tidak ditemukan');
+    }
+  }
+
+  async verifyLikeFromAlbumByUserId(userId, albumId) {
+    const query = {
+      text: '',
+      values: [userId, albumId],
+    };
+
+    const result = await db.query(query);
+    if (result.rowCount) {
+      throw new ClientError('Anda sudah memberikan suka pada album ini');
     }
   }
 }
