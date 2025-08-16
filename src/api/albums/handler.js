@@ -105,6 +105,19 @@ class AlbumsHandler {
     response.code(201);
     return response;
   }
+
+  async getLikesCountFromAlbumHandler(request) {
+    const { id } = request.params;
+
+    const likesCount = await this._userAlbumLikesService.getLikesCountFromAlbum(id);
+
+    return {
+      status: 'success',
+      data: {
+        likes: likesCount,
+      },
+    };
+  }
 }
 
 module.exports = AlbumsHandler;
