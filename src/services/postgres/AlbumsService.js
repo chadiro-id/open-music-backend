@@ -4,8 +4,12 @@ const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 class AlbumsService {
-  constructor(albumCoversService) {
+  constructor(
+    albumCoversService,
+    songsService
+  ) {
     this._albumCoversService = albumCoversService;
+    this._songsService = songsService;
   }
 
   async addAlbum({ name, year }) {
@@ -55,30 +59,25 @@ class AlbumsService {
   }
 
   async getAlbumWithSongs(id) {
-    const albumQuery = {
+    const query = {
       text: 'SELECT id, name, year FROM albums WHERE id = $1',
       values: [id],
     };
 
-    const albumResult = await db.query(albumQuery);
-    if (!albumResult.rowCount) {
+    const result = await db.query(query);
+    if (!result.rowCount) {
       throw new NotFoundError('Album tidak ditemukan');
     }
 
     const coverUrl = await this._albumCoversService.getCoverUrl(id);
-    console.log(`cover: ${coverUrl}`);
+    console.log(`[Albums Service ] get album with songs -> cover url: ${coverUrl}`);
 
-    const songsQuery = {
-      text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
-      values: [id],
-    };
-
-    const songsResult = await db.query(songsQuery);
+    const songs = await this._songsService.getSongsOfAlbum(id);
 
     return {
-      ...albumResult.rows[0],
+      ...result.rows[0],
       coverUrl,
-      songs: songsResult.rows
+      songs,
     };
   }
 
