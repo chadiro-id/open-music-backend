@@ -18,12 +18,12 @@ class UserAlbumLikesService {
 
   async getLikesCountFromAlbum(albumId) {
     const query = {
-      text: 'SELECT COUNT(*) FROM user_album_likes WHERE album_id = $1',
+      text: 'SELECT COUNT(id) FROM user_album_likes WHERE album_id = $1',
       values: [albumId],
     };
 
     const result = await db.query(query);
-    return result.rows[0].count;
+    return parseInt(result.rows[0].count);
   }
 
   async deleteLikeFromAlbum({ userId, albumId }) {
