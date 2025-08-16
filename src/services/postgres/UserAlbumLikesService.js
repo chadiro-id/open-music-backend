@@ -40,7 +40,7 @@ class UserAlbumLikesService {
 
   async verifyLikeFromAlbumByUserId(userId, albumId) {
     const query = {
-      text: '',
+      text: 'SELECT FROM user_album_likes WHERE user_id = $1 AND album_id = $2',
       values: [userId, albumId],
     };
 
