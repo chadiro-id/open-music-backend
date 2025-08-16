@@ -106,6 +106,18 @@ class AlbumsHandler {
     return response;
   }
 
+  async deleteLikeFromAlbumHandler(request) {
+    const { id: albumId } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+
+    await this._userAlbumLikesService.deleteLikeFromAlbum({ userId: credentialId, albumId });
+
+    return {
+      status: 'success',
+      message: 'Like berhasil dihapus dari album',
+    };
+  }
+
   async getLikesCountFromAlbumHandler(request) {
     const { id } = request.params;
 
