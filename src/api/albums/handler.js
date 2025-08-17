@@ -4,13 +4,13 @@ class AlbumsHandler {
   constructor(
     albumsService,
     albumCoversService,
-    userAlbumLikesService,
+    albumLikesService,
     albumsValidator,
     uploadsValidator
   ) {
     this._albumsService = albumsService;
     this._albumCoversService = albumCoversService;
-    this._userAlbumLikesService = userAlbumLikesService;
+    this._albumLikesService = albumLikesService;
     this._albumsValidator = albumsValidator;
     this._uploadsValidator = uploadsValidator;
 
@@ -96,9 +96,9 @@ class AlbumsHandler {
     const { id: credentialId } = request.auth.credentials;
 
     await this._albumsService.verifyAlbumById(albumId);
-    await this._userAlbumLikesService.verifyLikeFromAlbumByUserId(credentialId, albumId);
+    await this._albumLikesService.verifyLikeFromAlbumByUserId(credentialId, albumId);
 
-    await this._userAlbumLikesService.addLikeToAlbum({ userId: credentialId, albumId });
+    await this._albumLikesService.addLikeToAlbum({ userId: credentialId, albumId });
 
     const response = h.response({
       status: 'success',
@@ -113,7 +113,7 @@ class AlbumsHandler {
     const { id: albumId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
-    await this._userAlbumLikesService.deleteLikeFromAlbum({ userId: credentialId, albumId });
+    await this._albumLikesService.deleteLikeFromAlbum({ userId: credentialId, albumId });
 
     return {
       status: 'success',
@@ -124,7 +124,7 @@ class AlbumsHandler {
   async getLikesCountFromAlbumHandler(request, h) {
     const { id } = request.params;
 
-    const [likes, dataSource] = await this._userAlbumLikesService.getLikesCountFromAlbum(id);
+    const [likes, dataSource] = await this._albumLikesService.getLikesCountFromAlbum(id);
 
     console.log(`[Albums Handler] likes -> count: ${likes}, src: ${dataSource}`);
 

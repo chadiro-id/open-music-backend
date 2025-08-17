@@ -3,7 +3,7 @@ const ClientError = require('../../exceptions/ClientError');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
-class UserAlbumLikesService {
+class AlbumLikesService {
   constructor(cacheService) {
     this._cacheService = cacheService;
   }
@@ -71,4 +71,4 @@ class UserAlbumLikesService {
   }
 }
 
-module.exports = UserAlbumLikesService;
+module.exports = AlbumLikesService;
