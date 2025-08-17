@@ -2,7 +2,7 @@ const db = require('../../infras/postgres');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
-const { mapSongDataToModel } = require('../../utils');
+const { mapSongDataToModel } = require('../../utils/model-util');
 
 class SongsService {
   async addSong({
