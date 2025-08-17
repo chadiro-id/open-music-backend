@@ -40,7 +40,7 @@ const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports');
 
 const UploadsValidator = require('./validator/uploads');
-const StorageService = require('./services/S3/StorageService');
+const StorageService = require('./services/s3/StorageService');
 const CacheService = require('./services/redis/CacheService');
 
 const init = async () => {
