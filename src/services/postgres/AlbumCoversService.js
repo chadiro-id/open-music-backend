@@ -1,4 +1,4 @@
-const db = require('../../db/postgres');
+const db = require('../../infras/postgres');
 
 class AlbumCoversService {
   constructor(storageService) {

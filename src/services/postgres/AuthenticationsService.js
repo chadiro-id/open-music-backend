@@ -1,4 +1,4 @@
-const db = require('../../db/postgres');
+const db = require('../../infras/postgres');
 const InvariantError = require('../../exceptions/InvariantError');
 
 class AuthenticationsService {
