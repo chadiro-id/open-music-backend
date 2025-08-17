@@ -1,3 +1,4 @@
+const config = require('../../config');
 const {
   S3Client,
   PutObjectCommand,
@@ -10,17 +11,17 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 class StorageService {
   constructor() {
     this._client = new S3Client({
-      region: process.env.AWS_REGION,
+      region: config.aws.s3.region,
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: config.aws.accessKeyId,
+        secretAccessKey: config.aws.secretAccessKey,
       },
     });
   }
 
   async uploadFile(key, fileBuffer, mimeType) {
     const command = new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: config.aws.s3.bucketName,
       Key: key,
       Body: fileBuffer,
       ContentType: mimeType,
@@ -31,7 +32,7 @@ class StorageService {
 
   async deleteFile(key) {
     const command = new DeleteObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: config.aws.s3.bucketName,
       Key: key,
     });
 
@@ -39,7 +40,7 @@ class StorageService {
   }
 
   generateSignedUrl(key, expiresIn = 3600) {
-    const command = new GetObjectCommand({ Bucket: process.env.AWS_BUCKET_NAME, Key: key });
+    const command = new GetObjectCommand({ Bucket: config.aws.s3.bucketName, Key: key });
     return getSignedUrl(this._client, command, { expiresIn });
   }
 }
