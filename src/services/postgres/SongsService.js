@@ -2,7 +2,7 @@ const db = require('../../infras/postgres');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
-const { mapSong } = require('../../utils/model-util');
+const { mapSongData } = require('../../utils/model-util');
 
 class SongsService {
   async addSong({
@@ -68,7 +68,7 @@ class SongsService {
       throw new NotFoundError('Lagu tidak ditemukan');
     }
 
-    return result.rows.map(mapSong)[0];
+    return result.rows.map(mapSongData)[0];
   }
 
   async editSongById(id, {
