@@ -9,7 +9,7 @@ exports.up = (pgm) => {
       type: 'TEXT',
       notNull: true,
     },
-  });
+  }, { ifNotExists: true });
 };
 
 /**
@@ -18,5 +18,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropTable('authentications');
+  pgm.dropTable('authentications', { ifExists: true });
 };

@@ -16,7 +16,7 @@ exports.up = (pgm) => {
     owner: {
       type: 'VARCHAR(50)',
     }
-  });
+  }, { ifNotExists: true });
 
 
   pgm.sql("INSERT INTO users (id, username, password, fullname) VALUES ('playlist_ownerless', 'playlist_ownerless', 'playlist_ownerless', 'playlist_ownerless')");
@@ -48,5 +48,5 @@ exports.down = (pgm) => {
 
   pgm.sql("DELETE FROM users WHERE id = 'playlist_ownerless'");
 
-  pgm.dropTable('playlists');
+  pgm.dropTable('playlists', { ifExists: true });
 };

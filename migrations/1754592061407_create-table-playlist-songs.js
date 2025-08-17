@@ -17,7 +17,7 @@ exports.up = (pgm) => {
       type: 'VARCHAR(50)',
       notNull: true,
     }
-  });
+  }, { ifNotExists: true });
 
   pgm.addConstraint('playlist_songs', 'playlist_songs_playlist_id_song_id_key', {
     unique: [
@@ -66,5 +66,5 @@ exports.down = (pgm) => {
     cascade: true,
   });
 
-  pgm.dropTable('playlist_songs');
+  pgm.dropTable('playlist_songs', { ifExists: true });
 };

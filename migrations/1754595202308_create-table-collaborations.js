@@ -17,7 +17,7 @@ exports.up = (pgm) => {
       type: 'VARCHAR(50)',
       notNull: true,
     }
-  });
+  }, { ifNotExists: true });
 
   pgm.addConstraint('collaborations', 'collaborations_playlist_id_user_id_key', {
     unique: [
@@ -66,5 +66,5 @@ exports.down = (pgm) => {
     cascade: true,
   });
 
-  pgm.dropTable('collaborations');
+  pgm.dropTable('collaborations', { ifExists: true });
 };

@@ -17,7 +17,7 @@ exports.up = (pgm) => {
       type: 'VARCHAR(50)',
       notNull: true,
     }
-  });
+  }, { ifNotExists: true });
 
   pgm.addConstraint('album_likes', 'album_likes_album_id_fkey', {
     foreignKeys: {
@@ -46,8 +46,8 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropConstraint('album_likes', 'album_likes_album_id_user_id_key');
-  pgm.dropConstraint('album_likes', 'album_likes_user_id_fkey');
-  pgm.dropConstraint('album_likes', 'album_likes_album_id_fkey');
-  pgm.dropTable('album_likes');
+  pgm.dropConstraint('album_likes', 'album_likes_album_id_user_id_key', { ifExists: true });
+  pgm.dropConstraint('album_likes', 'album_likes_user_id_fkey', { ifExists: true });
+  pgm.dropConstraint('album_likes', 'album_likes_album_id_fkey', { ifExists: true });
+  pgm.dropTable('album_likes', { ifExists: true });
 };

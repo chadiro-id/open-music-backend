@@ -17,7 +17,7 @@ exports.up = (pgm) => {
       type: 'INTEGER',
       notNull: true,
     },
-  });
+  }, { ifNotExists: true });
 };
 
 /**
@@ -26,5 +26,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropTable('albums');
+  pgm.dropTable('albums', { ifExists: true });
 };

@@ -4,7 +4,7 @@
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-  pgm.createType('playlist_song_action', ['add', 'delete']);
+  pgm.createType('playlist_song_action', ['add', 'delete'], { ifNotExists: true });
 
   pgm.createTable('playlist_song_activities', {
     id: {
@@ -30,7 +30,7 @@ exports.up = (pgm) => {
     time: {
       type: 'TIMESTAMPTZ',
     }
-  });
+  }, { ifNotExists: true });
 };
 
 /**
@@ -39,6 +39,6 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropTable('playlist_song_activities');
-  pgm.dropType('playlist_song_action');
+  pgm.dropTable('playlist_song_activities', { ifExists: true });
+  pgm.dropType('playlist_song_action', { ifExists: true });
 };

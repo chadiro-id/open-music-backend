@@ -17,7 +17,7 @@ exports.up = (pgm) => {
       type: 'TEXT',
       notNull: true,
     }
-  });
+  }, { ifNotExists: true });
 
   pgm.addConstraint('album_covers', 'album_covers_album_id_fkey', {
     foreignKeys: {
@@ -49,5 +49,5 @@ exports.down = (pgm) => {
     cascade: true,
   });
 
-  pgm.dropTable('album_covers');
+  pgm.dropTable('album_covers', { ifExists: true });
 };
