@@ -1,6 +1,24 @@
 const client = require('../../infras/redis/client');
 
 class CacheService {
+  async setRefreshToken(token, expirationInSecond = 1800) {
+    const key = `refresh_token:${token}`;
+    await client.set(key, 1, {
+      EX: expirationInSecond,
+    });
+  }
+
+  async deleteRefreshToken(token) {
+    const key = `refresh_token:${token}`;
+    await client.del(key);
+  }
+
+  async verifyRefreshToken(token) {
+    const key = `refresh_token:${token}`;
+    const result = await client.exists(key);
+    return result;
+  }
+
   async setAlbumLikesCount(albumId, value, expirationInSecond = 1800) {
     const key = `album:${albumId}:likes_count`;
     await client.set(key, value, {
