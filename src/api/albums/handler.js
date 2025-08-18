@@ -96,9 +96,9 @@ class AlbumsHandler {
     const { id: credentialId } = request.auth.credentials;
 
     await this._albumsService.verifyAlbumById(albumId);
-    await this._albumLikesService.verifyLikeFromAlbumByUserId(credentialId, albumId);
+    await this._albumLikesService.verifyLikeFromAlbumByUserId(albumId, credentialId);
 
-    await this._albumLikesService.addLikeToAlbum({ userId: credentialId, albumId });
+    await this._albumLikesService.addLikeToAlbum({ albumId, userId: credentialId });
 
     const response = h.response({
       status: 'success',
@@ -113,7 +113,7 @@ class AlbumsHandler {
     const { id: albumId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
-    await this._albumLikesService.deleteLikeFromAlbum({ userId: credentialId, albumId });
+    await this._albumLikesService.deleteLikeFromAlbum({ albumId, userId: credentialId });
 
     return {
       status: 'success',
