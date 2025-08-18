@@ -9,14 +9,14 @@ exports.up = (pgm) => {
       type: 'VARCHAR(50)',
       primaryKey: true,
     },
+    album_id: {
+      type: 'VARCHAR(50)',
+      notNull: true,
+    },
     user_id: {
       type: 'VARCHAR(50)',
       notNull: true,
     },
-    album_id: {
-      type: 'VARCHAR(50)',
-      notNull: true,
-    }
   }, { ifNotExists: true });
 
   pgm.addConstraint('album_likes', 'album_likes_album_id_fkey', {
