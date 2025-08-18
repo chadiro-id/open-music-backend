@@ -21,17 +21,15 @@ class AlbumLikesService {
       throw new InvariantError('Suka gagal ditambahkan');
     }
 
-    await this._cacheService.delete(`album_likes:${albumId}`);
+    await this._cacheService.deleteAlbumLikesCount(albumId);
   }
 
   async getLikesCountFromAlbum(albumId) {
-    const cacheKey = `album_likes:${albumId}`;
-
-    const cachedLikesCount = await this._cacheService.get(cacheKey);
+    const cachedLikesCount = await this._cacheService.getAlbumLikesCount(albumId);
 
     if (cachedLikesCount) {
-      const count = parseInt(cachedLikesCount);
-      return [count, 'cache'];
+      const value = parseInt(cachedLikesCount);
+      return [value, 'cache'];
     }
 
     const query = {
@@ -40,10 +38,10 @@ class AlbumLikesService {
     };
 
     const result = await db.query(query);
-    const count = parseInt(result.rows[0].count);
+    const value = parseInt(result.rows[0].count);
 
-    await this._cacheService.set(cacheKey, count.toString());
-    return [count, 'db'] ;
+    await this._cacheService.setAlbumLikesCount(albumId, value);
+    return [value, 'db'] ;
   }
 
   async deleteLikeFromAlbum({ albumId, userId }) {
@@ -57,7 +55,7 @@ class AlbumLikesService {
       throw new NotFoundError('Suka gagal dihapus. ID tidak ditemukan');
     }
 
-    await this._cacheService.delete(`album_likes:${albumId}`);
+    await this._cacheService.deleteAlbumLikesCount(albumId);
   }
 
   async verifyLikeFromAlbumByUserId(albumId, userId) {

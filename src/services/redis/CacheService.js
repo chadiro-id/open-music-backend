@@ -1,26 +1,22 @@
 const client = require('../../infras/redis/client');
 
 class CacheService {
-  async set(key, value, expirationInSecond = 1800) {
-    const result = await client.set(key, value, {
+  async setAlbumLikesCount(albumId, value, expirationInSecond = 1800) {
+    const key = `album:${albumId}:likes_count`;
+    await client.set(key, value, {
       EX: expirationInSecond,
     });
-    console.log(`[Cache Service] set -> key: ${key}, val: ${value}, result: ${result}`);
-    const exists = await client.exists(key);
-    console.log(`[Cache Service] set -> key: ${key}, exists: ${exists}`);
   }
 
-  async get(key) {
+  async getAlbumLikesCount(albumId) {
+    const key = `album:${albumId}:likes_count`;
     const result = await client.get(key);
-    console.log(`[Cache Service] get -> key: ${key}, result: ${result}`);
     return result;
   }
 
-  async delete(key) {
-    const exists = await client.exists(key);
-    console.log(`[Cache Service] del -> key: ${key}, exists: ${exists}`);
-    const result = await client.del(key);
-    console.log(`[Cache Service] del -> key: ${key}, result: ${result}`);
+  async deleteAlbumLikesCount(albumId) {
+    const key = `album:${albumId}:likes_count`;
+    await client.del(key);
   }
 }
 
