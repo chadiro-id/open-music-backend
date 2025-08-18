@@ -28,35 +28,35 @@ class AlbumsService {
     return result.rows[0].id;
   }
 
-  async getAlbumById(id) {
-    const queryText = `
-    SELECT
-      a.id,
-      a.name,
-      a.year,
-      COALESCE(
-        JSON_AGG(
-          JSONB_BUILD_OBJECT(
-            'id', s.id,
-            'title', s.title,
-            'performer', s.performer
-          )
-        )
-        FILTER (WHERE s.album_id IS NOT NULL), '[]'::json
-      ) AS songs
-    FROM albums a
-    LEFT JOIN songs s ON a.id = s.album_id
-    WHERE a.id = $1
-    GROUP BY a.id;
-    `;
+  // async getAlbumById(id) {
+  //   const queryText = `
+  //   SELECT
+  //     a.id,
+  //     a.name,
+  //     a.year,
+  //     COALESCE(
+  //       JSON_AGG(
+  //         JSONB_BUILD_OBJECT(
+  //           'id', s.id,
+  //           'title', s.title,
+  //           'performer', s.performer
+  //         )
+  //       )
+  //       FILTER (WHERE s.album_id IS NOT NULL), '[]'::json
+  //     ) AS songs
+  //   FROM albums a
+  //   LEFT JOIN songs s ON a.id = s.album_id
+  //   WHERE a.id = $1
+  //   GROUP BY a.id;
+  //   `;
 
-    const result = await db.query(queryText, [id]);
-    if (!result.rowCount) {
-      throw new NotFoundError('Album tidak ditemukan');
-    }
+  //   const result = await db.query(queryText, [id]);
+  //   if (!result.rowCount) {
+  //     throw new NotFoundError('Album tidak ditemukan');
+  //   }
 
-    return result.rows[0];
-  }
+  //   return result.rows[0];
+  // }
 
   async getAlbumWithSongs(id) {
     const query = {
@@ -70,7 +70,7 @@ class AlbumsService {
     }
 
     const coverUrl = await this._albumCoversService.getCoverUrl(id);
-    console.log(`[Albums Service ] get album with songs -> cover url: ${coverUrl}`);
+    console.log(`[Albums Service] get album with songs -> cover url: ${coverUrl}`);
 
     const songs = await this._songsService.getSongsOfAlbum(id);
 
