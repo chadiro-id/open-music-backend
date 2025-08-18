@@ -9,11 +9,11 @@ class AlbumLikesService {
     this._cacheService = cacheService;
   }
 
-  async addLikeToAlbum({ userId, albumId }) {
+  async addLikeToAlbum({ albumId, userId }) {
     const id = `albumlikes-${nanoid(16)}`;
     const query = {
       text: 'INSERT INTO album_likes VALUES ($1, $2, $3) RETURNING id',
-      values: [id, userId, albumId],
+      values: [id, albumId, userId],
     };
 
     const result = await db.query(query);
@@ -46,10 +46,10 @@ class AlbumLikesService {
     return [count, 'db'] ;
   }
 
-  async deleteLikeFromAlbum({ userId, albumId }) {
+  async deleteLikeFromAlbum({ albumId, userId }) {
     const query = {
-      text: 'DELETE FROM album_likes WHERE user_id = $1 AND album_id = $2',
-      values: [userId, albumId],
+      text: 'DELETE FROM album_likes WHERE album_id = $1 AND user_id = $2',
+      values: [albumId, userId],
     };
 
     const result = await db.query(query);
@@ -60,7 +60,7 @@ class AlbumLikesService {
     await this._cacheService.delete(`album_likes:${albumId}`);
   }
 
-  async verifyLikeFromAlbumByUserId(userId, albumId) {
+  async verifyLikeFromAlbumByUserId(albumId, userId) {
     const query = {
       text: 'SELECT id FROM album_likes WHERE album_id = $1 AND user_id = $2',
       values: [albumId, userId],
