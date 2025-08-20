@@ -6,10 +6,12 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 class AlbumsService {
   constructor(
     albumCoversService,
-    songsService
+    songsService,
+    cacheService
   ) {
     this._albumCoversService = albumCoversService;
     this._songsService = songsService;
+    this._cacheService = cacheService;
   }
 
   async addAlbum({ name, year }) {
@@ -29,6 +31,12 @@ class AlbumsService {
   }
 
   async getAlbumById(id) {
+    const cachedAlbum = await this._cacheService.getAlbum(id);
+    if (cachedAlbum) {
+      console.log(`[Albums Service] get album by id -> cached album: ${cachedAlbum}`);
+      return [cachedAlbum, 'cache'];
+    }
+
     const query = {
       text: 'SELECT id, name, year FROM albums WHERE id = $1',
       values: [id],
@@ -42,20 +50,28 @@ class AlbumsService {
     const coverUrl = await this._albumCoversService.getCoverUrl(id);
     console.log(`[Albums Service] get album by id -> cover url: ${coverUrl}`);
 
-    return {
+    const album = {
       ...result.rows[0],
       coverUrl,
     };
+
+    await this._cacheService.setAlbum(id, album);
+
+    return [album, 'db'];
   }
 
   async getAlbumWithSongs(id) {
-    const album = await this.getAlbumById(id);
-    const songs = await this._songsService.getSongsOfAlbum(id);
+    const [album, source] = await this.getAlbumById(id);
+    const [songs, songsSource] = await this._songsService.getSongsOfAlbum(id);
 
-    return {
+    console.log(`[Albums Service] get album with songs -> source: [${source}, ${songsSource}]\nalbum: ${album},\nsongs: ${songs}`);
+
+    const data = {
       ...album,
       songs,
     };
+
+    return [data, source];
   }
 
   async editAlbumById(id, { name, year }) {
@@ -68,6 +84,8 @@ class AlbumsService {
     if (!result.rowCount) {
       throw new NotFoundError('Gagal memperbarui album. Id tidak ditemukan');
     }
+
+    await this._cacheService.deleteAlbum(id);
   }
 
   async deleteAlbumById(id) {
@@ -82,6 +100,8 @@ class AlbumsService {
     if (!result.rowCount) {
       throw new NotFoundError('Album gagal dihapus. Id tidak ditemukan');
     }
+
+    await this._cacheService.deleteAlbum(id);
   }
 
   async verifyAlbumById(id) {

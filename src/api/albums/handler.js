@@ -35,17 +35,23 @@ class AlbumsHandler {
     return response;
   }
 
-  async getAlbumByIdHandler(request) {
+  async getAlbumByIdHandler(request, h) {
     const { id } = request.params;
 
-    const album = await this._albumsService.getAlbumWithSongs(id);
+    const [album, source] = await this._albumsService.getAlbumWithSongs(id);
 
-    return {
+    const response = h.response({
       status: 'success',
       data: {
         album,
-      }
-    };
+      },
+    });
+
+    if (source === 'cache') {
+      response.header('X-Data-Source', 'cache');
+    }
+
+    return response;
   }
 
   async putAlbumByIdHandler(request) {

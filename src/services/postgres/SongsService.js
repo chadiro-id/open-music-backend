@@ -5,6 +5,10 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const { mapSongData } = require('../../utils/model-util');
 
 class SongsService {
+  constructor(cacheService) {
+    this._cacheService = cacheService;
+  }
+
   async addSong({
     title,
     year,
@@ -23,6 +27,10 @@ class SongsService {
     const result = await db.query(query);
     if (!result.rows[0]?.id) {
       throw new InvariantError('Lagu gagal ditambahkan');
+    }
+
+    if (albumId) {
+      await this._cacheService.addAlbumSongs(albumId, [{ id, title, performer }]);
     }
 
     return result.rows[0].id;
@@ -48,13 +56,22 @@ class SongsService {
   }
 
   async getSongsOfAlbum(albumId) {
+    const cachedSongs = await this._cacheService.getAlbumSongs(albumId);
+    if (Array.isArray(cachedSongs) && cachedSongs.length) {
+      return [cachedSongs, 'cache'];
+    }
+
     const query = {
       text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
       values: [albumId],
     };
 
     const result = await db.query(query);
-    return result.rows;
+    if (result.rowCount) {
+      await this._cacheService.addAlbumSongs(albumId, result.rows);
+    }
+
+    return [result.rows, 'db'];
   }
 
   async getSongById(id) {
