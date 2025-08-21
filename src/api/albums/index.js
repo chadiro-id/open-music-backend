@@ -8,6 +8,7 @@ module.exports = {
     albumsService,
     albumCoversService,
     albumLikesService,
+    songsService,
     albumsValidator,
     uploadsValidator
   }) => {
@@ -15,6 +16,7 @@ module.exports = {
       albumsService,
       albumCoversService,
       albumLikesService,
+      songsService,
       albumsValidator,
       uploadsValidator
     );

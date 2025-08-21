@@ -6,13 +6,11 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 class AlbumsService {
   constructor(
     albumCoversService,
-    songsService,
     cacheService
   ) {
     this._pool = new Pool();
 
     this._albumCoversService = albumCoversService;
-    this._songsService = songsService;
     this._cacheService = cacheService;
   }
 
@@ -60,20 +58,6 @@ class AlbumsService {
     await this._cacheService.setAlbum(id, album);
 
     return [album, 'this._pool'];
-  }
-
-  async getAlbumWithSongs(id) {
-    const [album, source] = await this.getAlbumById(id);
-    const [songs, songsSource] = await this._songsService.getSongsOfAlbum(id);
-
-    console.log(`[Albums Service] get album with songs -> source: [${source}, ${songsSource}]\nalbum: ${album},\nsongs: ${songs}`);
-
-    const data = {
-      ...album,
-      songs,
-    };
-
-    return [data, source];
   }
 
   async editAlbumById(id, { name, year }) {

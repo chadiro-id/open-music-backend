@@ -50,7 +50,7 @@ const init = async () => {
   const usersService = new UsersService();
   const songsService = new SongsService(cacheService);
   const albumCoversService = new AlbumCoversService(storageService);
-  const albumsService = new AlbumsService(albumCoversService, songsService, cacheService);
+  const albumsService = new AlbumsService(albumCoversService, cacheService);
   const albumLikesService = new AlbumLikesService(cacheService);
   const collaborationsService = new CollaborationsService();
   const playlistsService = new PlaylistsService(collaborationsService);
@@ -95,6 +95,7 @@ const init = async () => {
         albumsService,
         albumCoversService,
         albumLikesService,
+        songsService,
         albumsValidator: AlbumsValidator,
         uploadsValidator: UploadsValidator,
       },

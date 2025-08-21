@@ -5,12 +5,14 @@ class AlbumsHandler {
     albumsService,
     albumCoversService,
     albumLikesService,
+    songsService,
     albumsValidator,
     uploadsValidator
   ) {
     this._albumsService = albumsService;
     this._albumCoversService = albumCoversService;
     this._albumLikesService = albumLikesService;
+    this._songsService = songsService;
     this._albumsValidator = albumsValidator;
     this._uploadsValidator = uploadsValidator;
 
@@ -38,7 +40,10 @@ class AlbumsHandler {
   async getAlbumByIdHandler(request, h) {
     const { id } = request.params;
 
-    const [album, source] = await this._albumsService.getAlbumWithSongs(id);
+    const [album, albumSource] = await this._albumsService.getAlbumById(id);
+    const [songs, songsSource] = await this._songsService.getSongsOfAlbum(id);
+
+    album.songs = songs;
 
     const response = h.response({
       status: 'success',
@@ -47,7 +52,7 @@ class AlbumsHandler {
       },
     });
 
-    if (source === 'cache') {
+    if (albumSource === 'cache' && songsSource === 'cache') {
       response.header('X-Data-Source', 'cache');
     }
 
