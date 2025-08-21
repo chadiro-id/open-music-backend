@@ -12,6 +12,8 @@ class CacheService {
     });
 
     this._client.connect();
+
+    this._pool = this._client.createPool();
   }
 
   async setRefreshToken(token, expireInSecond = 1800) {
@@ -58,11 +60,11 @@ class CacheService {
   }
 
   async addAlbumSongs(albumId, values) {
-    const key = `albums:${albumId}:songs`;
-    const pool = this._client.createPool();
+    const albumKey = `albums:${albumId}`;
+    const key = `${albumKey}:songs`;
     try {
-      await pool.execute(async (client) => {
-        await client.watch(`albums:${albumId}`);
+      await this._pool.execute(async (client) => {
+        await client.watch(albumKey);
 
         const multi = client.multi();
 
@@ -74,7 +76,7 @@ class CacheService {
 
         multi.sAdd(key, ...values.map((value) => JSON.stringify(value)));
         const ttl = await client.ttl(key);
-        const albumTTL = await client.ttl(`albums:${albumId}`);
+        const albumTTL = await client.ttl(albumKey);
         console.log('[Cache Service] songs ttl:', ttl);
         console.log('[Cache Service] album ttl:', albumTTL);
         if (ttl < 0) {
@@ -82,6 +84,8 @@ class CacheService {
         }
 
         await multi.exec();
+        const ttlAfter = await client.ttl(key);
+        console.log('[Cache Service] songs ttl:', ttlAfter);
       });
     } catch (err) {
       if (err instanceof WatchError) {
