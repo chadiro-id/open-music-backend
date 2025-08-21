@@ -1,4 +1,4 @@
-const db = require('../../infras/postgres');
+const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
@@ -6,6 +6,8 @@ const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
   constructor(collaborationsService) {
+    this._pool = new Pool();
+
     this._collaborationsService = collaborationsService;
   }
 
@@ -17,7 +19,7 @@ class PlaylistsService {
       values: [id, name, owner],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     if (!result.rows[0]?.id) {
       throw new InvariantError('Daftar putar gagal ditambahkan');
     }
@@ -37,7 +39,7 @@ class PlaylistsService {
       values: [credentialId],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     return result.rows;
   }
 
@@ -50,7 +52,7 @@ class PlaylistsService {
       values: [id],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Daftar putar tidak ditemukan');
     }
@@ -64,7 +66,7 @@ class PlaylistsService {
       values: [id],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Daftar putar gagal dihapus. Id tidak ditemukan');
     }
@@ -76,7 +78,7 @@ class PlaylistsService {
       values: [id],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Daftar putar tidak ditemukan');
     }

@@ -1,4 +1,4 @@
-const db = require('../../infras/postgres');
+const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const ClientError = require('../../exceptions/ClientError');
 const InvariantError = require('../../exceptions/InvariantError');
@@ -6,6 +6,8 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 
 class AlbumLikesService {
   constructor(cacheService) {
+    this._pool = new Pool();
+
     this._cacheService = cacheService;
   }
 
@@ -16,7 +18,7 @@ class AlbumLikesService {
       values: [id, albumId, userId],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new InvariantError('Suka gagal ditambahkan');
     }
@@ -37,11 +39,11 @@ class AlbumLikesService {
       values: [albumId],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     const value = parseInt(result.rows[0].count);
 
     await this._cacheService.setAlbumLikesCount(albumId, value);
-    return [value, 'db'] ;
+    return [value, 'this._pool'] ;
   }
 
   async deleteLikeFromAlbum({ albumId, userId }) {
@@ -50,7 +52,7 @@ class AlbumLikesService {
       values: [albumId, userId],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Suka gagal dihapus. ID tidak ditemukan');
     }
@@ -64,7 +66,7 @@ class AlbumLikesService {
       values: [albumId, userId],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     if (result.rowCount) {
       throw new ClientError('Anda sudah memberikan suka pada album ini');
     }

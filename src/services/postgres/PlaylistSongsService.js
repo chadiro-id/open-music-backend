@@ -1,10 +1,14 @@
-const db = require('../../infras/postgres');
+const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 
 class PlaylistSongsService {
+  constructor() {
+    this._pool = new Pool();
+  }
+
   async addSongToPlaylist(userId, { playlistId, songId }) {
-    const client = await db.getClient();
+    const client = await this._pool.connect();
     try {
       await client.query('BEGIN');
       const playlistSongId = `ps-${nanoid(16)}`;
@@ -43,12 +47,12 @@ class PlaylistSongsService {
       values: [playlistId],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     return result.rows;
   }
 
   async deleteSongFromPlaylist(userId, { playlistId, songId }) {
-    const client = await db.getClient();
+    const client = await this._pool.connect();
     try {
       await client.query('BEGIN');
       await client.query(
@@ -84,7 +88,7 @@ class PlaylistSongsService {
       values: [playlistId],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     return result.rows;
   }
 }

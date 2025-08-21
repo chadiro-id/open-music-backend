@@ -1,8 +1,12 @@
-const db = require('../../infras/postgres');
+const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 
 class CollaborationsService {
+  constructor() {
+    this._pool = new Pool();
+  }
+
   async addCollaboration({ playlistId, userId }) {
     const id = `collab-${nanoid(16)}`;
 
@@ -11,7 +15,7 @@ class CollaborationsService {
       values: [id, playlistId, userId],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     if (!result.rows[0]?.id) {
       throw new InvariantError('Kolaborasi gagal ditambahkan');
     }
@@ -25,7 +29,7 @@ class CollaborationsService {
       values: [playlistId, userId],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new InvariantError('Kolaborasi gagal dihapus');
     }
@@ -37,7 +41,7 @@ class CollaborationsService {
       values: [playlistId, userId],
     };
 
-    const result = await db.query(query);
+    const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new InvariantError('Kolaborasi gagal diverifikasi');
     }
