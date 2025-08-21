@@ -157,28 +157,20 @@ class CacheService {
     console.log(result);
   }
 
-  async addPlaylistSongActivities(playlistId, values) {
+  async setPlaylistSongActivities(playlistId, value) {
     const key = `playlists:${playlistId}:song-activities`;
-    const multi = this._client.multi().rPush(key, ...values.map((val) => JSON.stringify(val)));
-    const ttl = await this._client.ttl(key);
-    if (ttl < 0) {
-      multi.expire(key, 1800);
-    }
-    const result = await multi.exec();
-    console.log(result);
+    await this._client.set(key, JSON.stringify(value), { EX: 1800 });
   }
 
-  async getPlaylistSongActivities(playlistId, start = 0, stop = -1) {
-    const key = `playlists:${playlistId}`;
-    const result = await this._client.lRange(key, start, stop);
-    console.log(result);
-    return result.map((element) => JSON.parse(element));
+  async getPlaylistSongActivities(playlistId) {
+    const key = `playlists:${playlistId}:song-activities`;
+    const result = await this._client.get(key);
+    return JSON.parse(result);
   }
 
-  async removePlaylistSongActivity(playlistId, element, count = 0) {
-    const key = `playlists:${playlistId}`;
-    const result = await this._client.lRem(key, count, element);
-    console.log(result);
+  async deletePlaylistSongActivities(playlistId) {
+    const key = `playlists:${playlistId}:song-activities`;
+    await this._client.del(key);
   }
 }
 

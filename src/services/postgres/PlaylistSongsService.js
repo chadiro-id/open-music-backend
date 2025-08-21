@@ -3,8 +3,10 @@ const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 
 class PlaylistSongsService {
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool();
+
+    this._cacheService = cacheService;
   }
 
   async addSongToPlaylist(userId, { playlistId, songId }) {
@@ -27,6 +29,7 @@ class PlaylistSongsService {
       );
 
       await client.query('COMMIT');
+      await this._cacheService.deletePlaylistSongActivities(playlistId);
       return insertSongResult.rows[0].id;
     } catch (error) {
       console.error(error);
@@ -68,6 +71,7 @@ class PlaylistSongsService {
         [songActivityId, playlistId, songId, userId, 'delete', time]
       );
       await client.query('COMMIT');
+      await this._cacheService.deletePlaylistSongActivities(playlistId);
     } catch (error) {
       console.error(error);
       await client.query('ROLLBACK');
@@ -78,6 +82,11 @@ class PlaylistSongsService {
   }
 
   async getSongActivitiesFromPlaylist(playlistId) {
+    const cachedActivites = await this._cacheService.getPlaylistSongActivities(playlistId);
+    if (Array.isArray(cachedActivites) && cachedActivites.length) {
+      return [cachedActivites, 'cache'];
+    }
+
     const query = {
       text: `SELECT u.username, s.title, psa.action, psa.time
       FROM playlist_song_activities psa
@@ -89,7 +98,9 @@ class PlaylistSongsService {
     };
 
     const result = await this._pool.query(query);
-    return result.rows;
+    await this._cacheService.setPlaylistSongActivities(playlistId, result.rows);
+
+    return [result.rows, 'main'];
   }
 }
 
