@@ -33,9 +33,20 @@ class AlbumsCacheService {
     await client.del(key);
   }
 
-  async setAlbumSongs(id, value, expirationInSecond = 1800) {
+  async setAlbumSongs(id, values) {
+    const mainKey = `albums:${id}`;
+    const isMainKeyExists = await client.exists(mainKey);
+    if (!isMainKeyExists) {
+      return;
+    }
+
     const key = `albums:${id}:songs`;
-    await client.set(key, value, { EX: expirationInSecond });
+    await pool.execute(async (dedicatedClient) => {
+      await dedicatedClient.watch(mainKey);
+      return dedicatedClient.multi()
+        .sAdd(key, ...values.map((val) => JSON.stringify(val)))
+        .expire(key, await dedicatedClient.ttl(mainKey));
+    });
   }
 
   async addAlbumSongs(id, value) {
@@ -53,8 +64,13 @@ class AlbumsCacheService {
 
   async getAlbumSongs(id) {
     const key = `albums:${id}:songs`;
-    const result = await client.get(key);
-    return result;
+    const result = await client.sMembers(key);
+    return result.map((member) => JSON.parse(member));
+  }
+
+  async removeAlbumSongs(id, value) {
+    const key = `albums:${id}:songs`;
+    await client.sRem(key, JSON.stringify(value));
   }
 
   async deleteAlbumSongs(id) {
