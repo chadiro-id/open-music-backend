@@ -1,35 +1,47 @@
+const config = require('../../config');
+
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const {
-  uploadFile,
-  deleteFile,
-  generateSignedUrl
-} = require('../../infras/s3');
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} = require('@aws-sdk/client-s3');
 
 class StorageService {
-  async uploadAlbumCover(albumId, fileStream) {
-    const {
-      _data: fileBuffer,
-      hapi: {
-        filename,
-        headers: {
-          ['content-type']: mimeType
-        }
-      }
-    } = fileStream;
-
-    const fileExt = require('path').extname(filename);
-    const key = `images/albums/${albumId}/cover${fileExt}`;
-
-    await uploadFile(key, fileBuffer, mimeType);
-
-    return key;
+  constructor() {
+    this._client = new S3Client({
+      region: config.aws.s3.region,
+      credentials: {
+        accessKeyId: config.aws.accessKeyId,
+        secretAccessKey: config.aws.secretAccessKey,
+      },
+    });
   }
 
-  async deleteAlbumCover(key) {
-    await deleteFile(key);
+  async uploadFile(key, fileBuffer, mimeType) {
+    const command = new PutObjectCommand({
+      Bucket: config.aws.s3.bucketName,
+      Key: key,
+      Body: fileBuffer,
+      ContentType: mimeType,
+    });
+
+    await this._client.send(command);
   }
 
-  async getAlbumCoverUrl(key) {
-    await generateSignedUrl(key);
+  async deleteFile(key) {
+    const command = new DeleteObjectCommand({
+      Bucket: config.aws.s3.bucketName,
+      Key: key,
+    });
+
+    await this._client.send(command);
+  }
+
+  generateSignedUrl(key, expiresIn = 3600) {
+    const command = new GetObjectCommand({ Bucket: config.aws.s3.bucketName, Key: key });
+    return getSignedUrl(this._client, command, { expiresIn });
   }
 }
 
