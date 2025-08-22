@@ -5,8 +5,21 @@ const client = createClient({
   socket: {
     host: config.redis.host,
   }
-}).on('error', (err) => console.error('Redis client error:', err));
+});
+
+client.on('error', (err) => {
+  console.error('Redis client error:', err);
+});
+
+const pool = client.createPool();
+
+pool.on('error', (err) => {
+  console.error('Redis client pool error:', err);
+});
 
 client.connect();
 
-module.exports = client;
+module.exports = {
+  client,
+  pool,
+};
