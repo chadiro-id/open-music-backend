@@ -3,18 +3,24 @@ const { client, pool } = require('../../infras/redis/client');
 class AlbumsCacheService {
   async setAlbum(id, value, expirationInSecond = 1800) {
     const key = `albums:${id}`;
-    await client.set(key, value, { EX: expirationInSecond });
+    await client.set(key, JSON.stringify(value), { EX: expirationInSecond });
   }
 
   async getAlbum(id) {
     const key = `albums:${id}`;
     const result = await client.get(key);
+    if (result) {
+      return JSON.parse(result);
+    }
     return result;
   }
 
   async deleteAlbum(id) {
     const key = `albums:${id}`;
-    await client.del(key);
+    await client.multi()
+      .del(key)
+      .del(`${key}:songs`)
+      .exec();
   }
 
   async setAlbumLikesCount(id, value, expirationInSecond = 1800) {
@@ -45,7 +51,8 @@ class AlbumsCacheService {
       await dedicatedClient.watch(mainKey);
       return dedicatedClient.multi()
         .sAdd(key, ...values.map((val) => JSON.stringify(val)))
-        .expire(key, await dedicatedClient.ttl(mainKey));
+        .expire(key, await dedicatedClient.ttl(mainKey))
+        .exec();
     });
   }
 
