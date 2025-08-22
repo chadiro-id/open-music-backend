@@ -1,14 +1,35 @@
+const {
+  uploadFile,
+  deleteFile,
+  generateSignedUrl
+} = require('../../infras/s3');
+
 class StorageService {
-  async uploadAlbumCoverImage(albumId) {
-    console.log(albumId);
+  async uploadAlbumCover(albumId, fileStream) {
+    const {
+      _data: fileBuffer,
+      hapi: {
+        filename,
+        headers: {
+          ['content-type']: mimeType
+        }
+      }
+    } = fileStream;
+
+    const fileExt = require('path').extname(filename);
+    const key = `images/albums/${albumId}/cover${fileExt}`;
+
+    await uploadFile(key, fileBuffer, mimeType);
+
+    return key;
   }
 
-  async deleteAlbumCoverImage(albumId) {
-    console.log(albumId);
+  async deleteAlbumCover(key) {
+    await deleteFile(key);
   }
 
-  async getAlbumCoverImageUrl(albumId) {
-    console.log(albumId);
+  async getAlbumCoverUrl(key) {
+    await generateSignedUrl(key);
   }
 }
 
