@@ -66,27 +66,22 @@ class CacheService {
       await this._pool.execute(async (client) => {
         await client.watch(albumKey);
 
-        const multi = client.multi();
+        const multi = client.multi()
+          .sAdd(key, ...values.map((value) => JSON.stringify(value)));
 
-        const members = values.map((val) => {
-          JSON.stringify(val);
-          console.dir(val);
-        });
-        console.log('Members length:', members.length);
-
-        multi.sAdd(key, ...values.map((value) => JSON.stringify(value)));
         const ttl = await client.ttl(key);
         const albumTTL = await client.ttl(albumKey);
         console.log('[Cache Service] songs ttl:', ttl);
         console.log('[Cache Service] album ttl:', albumTTL);
+
         if (ttl < 0) {
           multi.expire(key, albumTTL);
         }
 
-        await multi.exec();
-        const ttlAfter = await client.ttl(key);
-        console.log('[Cache Service] songs ttl:', ttlAfter);
+        return multi.exec();
       });
+      const updatedTTL = await this._client.ttl(key);
+      console.log('[Cache Service] songs ttl:', updatedTTL);
     } catch (err) {
       if (err instanceof WatchError) {
         console.log('[Cache Service] add album songs -> watch error:', err);
@@ -130,8 +125,8 @@ class CacheService {
     await this._client.del(key);
   }
 
-  async addUserPlaylists(userId, values) {
-    const key = `playlists:${userId}`;
+  async addPlaylistsToUser(credentialId, values) {
+    const key = `playlists:${credentialId}`;
 
     const multi = this._client.multi().rPush(key, ...values.map((val) => JSON.stringify(val)));
 
@@ -144,17 +139,38 @@ class CacheService {
     console.log(...result);
   }
 
-  async getUserPlaylists(userId, start = 0, stop = -1) {
-    const key = `playlists:${userId}`;
+  async getPlaylistsByUser(credentialId, start = 0, stop = -1) {
+    const key = `playlists:${credentialId}`;
     const result = await this._client.lRange(key, start, stop);
     console.log(result);
     return result.map((element) => JSON.parse(element));
   }
 
-  async removeUserPlaylist(userId, element, count = 0) {
-    const key = `playlists:${userId}`;
-    const result = await this._client.lRem(key, count, element);
+  async deletePlaylistsByUser(credentialId) {
+    const key = `playlists:${credentialId}`;
+    const result = await this._client.del(key);
     console.log(result);
+  }
+
+  async setPlaylist(playlistId, value, expirationInSecond = 1800) {
+    const key = `playlists:${playlistId}`;
+    await this._client.set(key, JSON.stringify(value), { EX: expirationInSecond });
+  }
+
+  async getPlaylist(playlistId) {
+    const key = `playlists:${playlistId}`;
+    const result = await this._client.get(key);
+
+    if (result) {
+      return JSON.parse(result);
+    }
+
+    return null;
+  }
+
+  async deletePlaylist(playlistId) {
+    const key = `playlists:${playlistId}`;
+    await this._client.del(key);
   }
 
   async setPlaylistSongActivities(playlistId, value) {

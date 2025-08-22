@@ -5,10 +5,14 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
-  constructor(collaborationsService) {
+  constructor(
+    collaborationsService,
+    cacheService
+  ) {
     this._pool = new Pool();
 
     this._collaborationsService = collaborationsService;
+    this._cacheService = cacheService;
   }
 
   async addPlaylist({ name, owner }) {
@@ -28,6 +32,11 @@ class PlaylistsService {
   }
 
   async getPlaylists(credentialId) {
+    const cachedPlaylists = await this._cacheService.getPlaylistsByUser(credentialId);
+    if (Array.isArray(cachedPlaylists) && cachedPlaylists.length) {
+      return [cachedPlaylists, 'cache'];
+    }
+
     const query = {
       text: `SELECT p.id, p.name, u.username
       FROM playlists p
@@ -40,10 +49,17 @@ class PlaylistsService {
     };
 
     const result = await this._pool.query(query);
-    return result.rows;
+    await this._cacheService.addPlaylistsToUser(credentialId, result.rows);
+
+    return [result.rows, 'main'];
   }
 
   async getPlaylistById(id) {
+    const cachedPlaylist = await this._cacheService.getPlaylist(id);
+    if (cachedPlaylist) {
+      return [cachedPlaylist, 'cache'];
+    }
+
     const query = {
       text: `SELECT p.id, p.name, u.username
       FROM playlists p
@@ -57,7 +73,9 @@ class PlaylistsService {
       throw new NotFoundError('Daftar putar tidak ditemukan');
     }
 
-    return result.rows[0];
+    await this._cacheService.setPlaylist(id, result.rows[0]);
+
+    return [result.rows[0], 'main'];
   }
 
   async deletePlaylistById(id) {
@@ -70,6 +88,8 @@ class PlaylistsService {
     if (!result.rowCount) {
       throw new NotFoundError('Daftar putar gagal dihapus. Id tidak ditemukan');
     }
+
+    await this._cacheService.deletePlaylist(id);
   }
 
   async verifyPlaylistOwner(id, owner) {
