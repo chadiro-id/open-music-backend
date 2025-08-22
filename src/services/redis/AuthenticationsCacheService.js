@@ -1,7 +1,7 @@
 const { client } = require('../../infras/redis/client');
 
 class AuthenticationsCacheService {
-  async setRefreshToken(token, expirationInSecond) {
+  async setRefreshToken(token, expirationInSecond = 1800) {
     const key = `refresh_token:${token}`;
     await client.set(key, 1, { EX: expirationInSecond });
   }
