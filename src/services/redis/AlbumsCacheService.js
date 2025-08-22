@@ -1,4 +1,4 @@
-const { client } = require('../../infras/redis/client');
+const { client, pool } = require('../../infras/redis/client');
 
 class AlbumsCacheService {
   async setAlbum(id, value, expirationInSecond = 1800) {
@@ -36,6 +36,19 @@ class AlbumsCacheService {
   async setAlbumSongs(id, value, expirationInSecond = 1800) {
     const key = `albums:${id}:songs`;
     await client.set(key, value, { EX: expirationInSecond });
+  }
+
+  async addAlbumSongs(id, value) {
+    const key = `albums:${id}:songs`;
+    const exists = await client.exists(key);
+    if (!exists) {
+      return;
+    }
+
+    await pool.execute(async (dedicatedClient) => {
+      await dedicatedClient.watch(key);
+      return dedicatedClient.sAdd(key, JSON.stringify(value));
+    });
   }
 
   async getAlbumSongs(id) {
