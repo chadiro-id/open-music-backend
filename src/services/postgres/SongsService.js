@@ -32,7 +32,7 @@ class SongsService {
     }
 
     if (albumId) {
-      await this._cacheService.addAlbumSongs(albumId, [{ id, title, performer }]);
+      await this._cacheService.addAlbumSongs(albumId, { id, title, performer });
     }
 
     return result.rows[0].id;
@@ -70,7 +70,7 @@ class SongsService {
 
     const result = await this._pool.query(query);
     if (result.rowCount) {
-      await this._cacheService.addAlbumSongs(albumId, result.rows);
+      await this._cacheService.setAlbumSongs(albumId, result.rows);
     }
 
     return [result.rows, 'this._pool'];
@@ -112,17 +112,32 @@ class SongsService {
     if (!result.rowCount) {
       throw new NotFoundError('Gagal memperbarui lagu. Id tidak ditemukan');
     }
+
+    if (albumId) {
+      await this._cacheService.deleteAlbum(albumId);
+    }
   }
 
   async deleteSongById(id) {
     const query = {
-      text: 'DELETE FROM songs WHERE id = $1 RETURNING id',
+      text: 'DELETE FROM songs WHERE id = $1 RETURNING id, title, performer, album_id',
       values: [id],
     };
 
     const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Lagu gagal dihapus. Id tidak ditemukan');
+    }
+
+    const {
+      id: removedId,
+      title,
+      performer,
+      albumId
+    } = result.rows.map(mapSongData)[0];
+
+    if (albumId) {
+      await this._cacheService.removeAlbumSongs(albumId, { removedId, title, performer });
     }
   }
 
