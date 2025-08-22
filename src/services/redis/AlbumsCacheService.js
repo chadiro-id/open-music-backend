@@ -17,22 +17,6 @@ class AlbumsCacheService {
     await client.del(key);
   }
 
-  async setAlbumCoverUrl(id, value, expirationinSecond = 1800) {
-    const key = `albums:${id}:cover_url`;
-    await client.set(key, value, { EX: expirationinSecond });
-  }
-
-  async getAlbumCoverUrl(id) {
-    const key = `albums:${id}:cover_url`;
-    const result = await client.get(key);
-    return result;
-  }
-
-  async deleteAlbumCoverUrl(id) {
-    const key = `albums:${id}:cover_url`;
-    await client.del(key);
-  }
-
   async setAlbumLikesCount(id, value, expirationInSecond = 1800) {
     const key = `albums:${id}:likes_count`;
     await client.set(key, value, { EX: expirationInSecond });

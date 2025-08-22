@@ -1,10 +1,14 @@
 const { Pool } = require('pg');
 
 class AlbumCoversService {
-  constructor(storageService) {
+  constructor(
+    storageService,
+    cacheService,
+  ) {
     this._pool = new Pool();
 
     this._storageService = storageService;
+    this._cacheService = cacheService;
   }
 
   async addCoverToAlbum(albumId, cover) {
@@ -16,6 +20,7 @@ class AlbumCoversService {
     };
 
     await this._pool.query(query);
+    await this._cacheService.deleteAlbum(albumId);
   }
 
   async getCoverUrl(albumId) {
