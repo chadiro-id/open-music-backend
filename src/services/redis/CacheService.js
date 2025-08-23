@@ -1,192 +1,122 @@
-const config = require('../../config');
-const { createClient, WatchError } = require('redis');
+const { client, pool } = require('../../infras/redis/client');
 
 class CacheService {
-  constructor() {
-    this._client = createClient({
-      socket: {
-        host: config.redis.host,
-      },
-    }).on('error', (err) => {
-      console.error('Redis client error', err);
-    });
-
-    this._client.connect();
-
-    this._pool = this._client.createPool();
-  }
-
   async setRefreshToken(token, expireInSecond = 1800) {
-    const key = `refresh-token:${token}`;
-    await this._client.set(key, 1, {
+    const key = `refresh_token:${token}`;
+    await client.set(key, 1, {
       EX: expireInSecond,
     });
   }
 
   async deleteRefreshToken(token) {
-    const key = `refresh-token:${token}`;
-    await this._client.del(key);
+    const key = `refresh_token:${token}`;
+    await client.del(key);
   }
 
   async verifyRefreshToken(token) {
-    const key = `refresh-token:${token}`;
-    const result = await this._client.exists(key);
+    const key = `refresh_token:${token}`;
+    const result = await client.exists(key);
     return result;
   }
 
-  async setAlbum(albumId, value, expireInSecond = 1800) {
-    const key = `albums:${albumId}`;
-    await this._client.multi()
-      .set(key, JSON.stringify(value), { EX: expireInSecond })
-      .del(`albums:${albumId}:songs`)
-      .exec();
+  async setAlbum(id, value, expirationInSecond = 1800) {
+    const key = `albums:${id}`;
+    await client.set(key, JSON.stringify(value), { EX: expirationInSecond });
   }
 
-  async getAlbum(albumId) {
-    const key = `albums:${albumId}`;
-    const result = await this._client.get(key);
-    return JSON.parse(result);
-  }
-
-  async deleteAlbum(albumId) {
-    const key = `albums:${albumId}`;
-
-    const result = await this._client.multi()
-      .del(key)
-      .del(`albums:${albumId}:songs`)
-      .exec();
-
-    console.log('[Cache Service] delete album -> result:', ...result);
-  }
-
-  async addAlbumSongs(albumId, values) {
-    const albumKey = `albums:${albumId}`;
-    const key = `${albumKey}:songs`;
-    try {
-      await this._pool.execute(async (client) => {
-        await client.watch(albumKey);
-
-        const multi = client.multi()
-          .sAdd(key, ...values.map((value) => JSON.stringify(value)));
-
-        const ttl = await client.ttl(key);
-        const albumTTL = await client.ttl(albumKey);
-        console.log('[Cache Service] songs ttl:', ttl);
-        console.log('[Cache Service] album ttl:', albumTTL);
-
-        if (ttl < 0) {
-          multi.expire(key, albumTTL);
-        }
-
-        return multi.exec();
-      });
-      const updatedTTL = await this._client.ttl(key);
-      console.log('[Cache Service] songs ttl:', updatedTTL);
-    } catch (err) {
-      if (err instanceof WatchError) {
-        console.log('[Cache Service] add album songs -> watch error:', err);
-      }
-      console.log('[Cache Service] add album songs -> error:', err);
-    }
-  }
-
-  async getAlbumSongs(albumId) {
-    const key = `albums:${albumId}:songs`;
-    const result = await this._client.sMembers(key);
-    return result.map((member) => JSON.parse(member));
-  }
-
-  async removeAlbumSongs(albumId, values) {
-    const key = `albums:${albumId}:songs`;
-    const result = await this._client.sRem(key, ...values.map((value) => JSON.stringify(value)));
-    console.log('[Cache Service] remove album songs -> result:', result);
-  }
-
-  async deleteAlbumSongs(albumId) {
-    const key = `albums:${albumId}:songs`;
-    await this._client.del(key);
-  }
-
-  async setAlbumLikesCount(albumId, value, expireInSecond = 1800) {
-    const key = `albums:${albumId}:likes-count`;
-    await this._client.set(key, value, {
-      EX: expireInSecond,
-    });
-  }
-
-  async getAlbumLikesCount(albumId) {
-    const key = `albums:${albumId}:likes-count`;
-    const result = await this._client.get(key);
-    return result;
-  }
-
-  async deleteAlbumLikesCount(albumId) {
-    const key = `albums:${albumId}:likes-count`;
-    await this._client.del(key);
-  }
-
-  async addPlaylistsToUser(credentialId, values) {
-    const key = `playlists:${credentialId}`;
-
-    const multi = this._client.multi().rPush(key, ...values.map((val) => JSON.stringify(val)));
-
-    const ttl = await this._client.TTL(key);
-    if (ttl < 0) {
-      multi.expire(key, 1800);
-    }
-
-    const result = await multi.exec();
-    console.log(...result);
-  }
-
-  async getPlaylistsByUser(credentialId, start = 0, stop = -1) {
-    const key = `playlists:${credentialId}`;
-    const result = await this._client.lRange(key, start, stop);
-    console.log(result);
-    return result.map((element) => JSON.parse(element));
-  }
-
-  async deletePlaylistsByUser(credentialId) {
-    const key = `playlists:${credentialId}`;
-    const result = await this._client.del(key);
-    console.log(result);
-  }
-
-  async setPlaylist(playlistId, value, expirationInSecond = 1800) {
-    const key = `playlists:${playlistId}`;
-    await this._client.set(key, JSON.stringify(value), { EX: expirationInSecond });
-  }
-
-  async getPlaylist(playlistId) {
-    const key = `playlists:${playlistId}`;
-    const result = await this._client.get(key);
-
+  async getAlbum(id) {
+    const key = `albums:${id}`;
+    const result = await client.get(key);
     if (result) {
       return JSON.parse(result);
     }
-
-    return null;
+    return result;
   }
 
-  async deletePlaylist(playlistId) {
-    const key = `playlists:${playlistId}`;
-    await this._client.del(key);
+  async deleteAlbum(id) {
+    const key = `albums:${id}`;
+    await client.multi()
+      .del(key)
+      .del(`${key}:songs`)
+      .exec();
   }
 
-  async setPlaylistSongActivities(playlistId, value) {
-    const key = `playlists:${playlistId}:song-activities`;
-    await this._client.set(key, JSON.stringify(value), { EX: 1800 });
+  async setAlbumLikesCount(id, value, expirationInSecond = 1800) {
+    const key = `albums:${id}:likes_count`;
+    await client.set(key, value, { EX: expirationInSecond });
   }
 
-  async getPlaylistSongActivities(playlistId) {
-    const key = `playlists:${playlistId}:song-activities`;
-    const result = await this._client.get(key);
-    return JSON.parse(result);
+  async getAlbumLikesCount(id) {
+    const key = `albums:${id}:likes_count`;
+    const result = await client.get(key);
+    return result;
+  }
+
+  async deleteAlbumLikesCount(id) {
+    const key = `albums:${id}:likes_count`;
+    await client.del(key);
+  }
+
+  async setAlbumSongs(id, values) {
+    const mainKey = `albums:${id}`;
+    const isMainKeyExists = await client.exists(mainKey);
+    if (!isMainKeyExists) {
+      return;
+    }
+
+    const key = `albums:${id}:songs`;
+    await pool.execute(async (dedicatedClient) => {
+      await dedicatedClient.watch(mainKey);
+      return dedicatedClient.multi()
+        .sAdd(key, ...values.map((val) => JSON.stringify(val)))
+        .expire(key, await dedicatedClient.ttl(mainKey))
+        .exec();
+    });
+  }
+
+  async addAlbumSongs(id, value) {
+    const key = `albums:${id}:songs`;
+    const exists = await client.exists(key);
+    if (!exists) {
+      return;
+    }
+
+    await pool.execute(async (dedicatedClient) => {
+      await dedicatedClient.watch(key);
+      return dedicatedClient.sAdd(key, JSON.stringify(value));
+    });
+  }
+
+  async getAlbumSongs(id) {
+    const key = `albums:${id}:songs`;
+    const result = await client.sMembers(key);
+    return result.map((member) => JSON.parse(member));
+  }
+
+  async removeAlbumSongs(id, value) {
+    const key = `albums:${id}:songs`;
+    await client.sRem(key, JSON.stringify(value));
+  }
+
+  async deleteAlbumSongs(id) {
+    const key = `albums:${id}:songs`;
+    await client.del(key);
+  }
+
+  async setPlaylistSongActivities(playlistId, values) {
+    const key = `playlists:${playlistId}:song_activities`;
+    await client.rPush(key, ...values.map((val) => JSON.stringify(val)));
+  }
+
+  async getPlaylistSongActivities(playlistId, start = 0, stop = -1) {
+    const key = `playlists:${playlistId}:song_activities`;
+    const result = await client.lRange(key, start, stop);
+    return result.map((element) => JSON.parse(element));
   }
 
   async deletePlaylistSongActivities(playlistId) {
-    const key = `playlists:${playlistId}:song-activities`;
-    await this._client.del(key);
+    const key = `playlists:${playlistId}:song_activities`;
+    await client.del(key);
   }
 }
 
