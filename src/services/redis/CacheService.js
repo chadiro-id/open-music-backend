@@ -34,11 +34,9 @@ class CacheService {
   }
 
   async deleteAlbum(id) {
-    const key = `albums:${id}`;
-    await client.multi()
-      .del(key)
-      .del(`${key}:songs`)
-      .exec();
+    const albumKey = `albums:${id}`;
+    const albumSongsKey = `albums:${id}:songs`;
+    await client.unlink(albumKey, albumSongsKey);
   }
 
   async setAlbumLikesCount(id, value, expirationInSecond = 1800) {
@@ -57,7 +55,24 @@ class CacheService {
     await client.del(key);
   }
 
-  async setAlbumSongs(id, values) {
+  // async setAlbumSongs(id, values) {
+  //   const mainKey = `albums:${id}`;
+  //   const isMainKeyExists = await client.exists(mainKey);
+  //   if (!isMainKeyExists) {
+  //     return;
+  //   }
+
+  //   const key = `albums:${id}:songs`;
+  //   await pool.execute(async (dedicatedClient) => {
+  //     await dedicatedClient.watch(mainKey);
+  //     return dedicatedClient.multi()
+  //       .sAdd(key, ...values.map((val) => JSON.stringify(val)))
+  //       .expire(key, await dedicatedClient.ttl(mainKey))
+  //       .exec();
+  //   });
+  // }
+
+  async addAlbumSongs(id, values) {
     const mainKey = `albums:${id}`;
     const isMainKeyExists = await client.exists(mainKey);
     if (!isMainKeyExists) {
@@ -65,25 +80,18 @@ class CacheService {
     }
 
     const key = `albums:${id}:songs`;
-    await pool.execute(async (dedicatedClient) => {
-      await dedicatedClient.watch(mainKey);
-      return dedicatedClient.multi()
-        .sAdd(key, ...values.map((val) => JSON.stringify(val)))
-        .expire(key, await dedicatedClient.ttl(mainKey))
-        .exec();
-    });
-  }
+    await pool.execute(async (_client) => {
+      await _client.watch(mainKey);
 
-  async addAlbumSongs(id, value) {
-    const key = `albums:${id}:songs`;
-    const exists = await client.exists(key);
-    if (!exists) {
-      return;
-    }
+      const multi =  _client.multi()
+        .sAdd(key, ...values.map((val) => JSON.stringify(val)));
 
-    await pool.execute(async (dedicatedClient) => {
-      await dedicatedClient.watch(key);
-      return dedicatedClient.sAdd(key, JSON.stringify(value));
+      const ttl = await _client.ttl(key);
+      if (ttl < 0) {
+        multi.expire(key, await _client.ttl(mainKey));
+      }
+
+      return multi.exec();
     });
   }
 
@@ -98,10 +106,10 @@ class CacheService {
     await client.sRem(key, JSON.stringify(value));
   }
 
-  async deleteAlbumSongs(id) {
-    const key = `albums:${id}:songs`;
-    await client.del(key);
-  }
+  // async deleteAlbumSongs(id) {
+  //   const key = `albums:${id}:songs`;
+  //   await client.del(key);
+  // }
 
   async addPlaylistSongActivities(playlistId, values) {
     const key = `playlists:${playlistId}:song_activities`;

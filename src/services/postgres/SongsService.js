@@ -68,7 +68,7 @@ class SongsService {
 
     const result = await db.query(query);
     if (result.rowCount) {
-      await this._cacheService.setAlbumSongs(albumId, result.rows);
+      await this._cacheService.addAlbumSongs(albumId, result.rows);
     }
 
     return [result.rows, 'db'];
@@ -135,7 +135,7 @@ class SongsService {
     } = result.rows.map(mapSongData)[0];
 
     if (albumId) {
-      await this._cacheService.removeAlbumSongs(albumId, { removedId, title, performer });
+      await this._cacheService.removeAlbumSongs(albumId, { id: removedId, title, performer });
     }
   }
 
