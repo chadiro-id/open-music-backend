@@ -113,7 +113,7 @@ class AlbumsHandler {
 
     const response = h.response({
       status: 'success',
-      message: 'Like berhasil ditambahkan ke album'
+      message: 'Suka berhasil ditambahkan ke album'
     });
 
     response.code(201);
@@ -128,7 +128,7 @@ class AlbumsHandler {
 
     return {
       status: 'success',
-      message: 'Like berhasil dihapus dari album',
+      message: 'Suka berhasil dihapus dari album',
     };
   }
 
@@ -136,8 +136,6 @@ class AlbumsHandler {
     const { id } = request.params;
 
     const [likes, dataSource] = await this._albumLikesService.getLikesCountFromAlbum(id);
-
-    console.log(`[Albums Handler] likes -> count: ${likes}, src: ${dataSource}`);
 
     const response = h.response({
       status: 'success',
