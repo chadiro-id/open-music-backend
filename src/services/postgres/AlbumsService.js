@@ -31,7 +31,6 @@ class AlbumsService {
   async getAlbumById(id) {
     const cachedAlbum = await this._cacheService.getAlbum(id);
     if (cachedAlbum) {
-      console.log(`[Albums Service] get album by id -> cached album: ${cachedAlbum}`);
       return [cachedAlbum, 'cache'];
     }
 
