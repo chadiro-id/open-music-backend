@@ -30,7 +30,7 @@ class SongsService {
     }
 
     if (albumId) {
-      await this._cacheService.addAlbumSongs(albumId, { id, title, performer });
+      await this._cacheService.addAlbumSongs(albumId, [{ id, title, performer }]);
     }
 
     return result.rows[0].id;
@@ -135,7 +135,7 @@ class SongsService {
     } = result.rows.map(mapSongData)[0];
 
     if (albumId) {
-      await this._cacheService.removeAlbumSongs(albumId, { id: removedId, title, performer });
+      await this._cacheService.removeAlbumSongs(albumId, [{ id: removedId, title, performer }]);
     }
   }
 
