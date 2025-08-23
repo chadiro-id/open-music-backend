@@ -42,19 +42,23 @@ const ExportsValidator = require('./validator/exports');
 const UploadsValidator = require('./validator/uploads');
 const StorageService = require('./services/s3/StorageService');
 const CacheService = require('./services/redis/CacheService');
+const AlbumsCacheService = require('./services/redis/AlbumsCacheService');
+const PlaylistsCacheService = require('./services/redis/PlaylistsCacheService');
 
 const init = async () => {
   const cacheService = new CacheService();
   const storageService = new StorageService();
+  const albumsCacheService = new AlbumsCacheService();
+  const playlistsCacheService = new PlaylistsCacheService();
   const authenticationsService = new AuthenticationsService(cacheService);
   const usersService = new UsersService();
-  const songsService = new SongsService(cacheService);
-  const albumCoversService = new AlbumCoversService(storageService);
-  const albumsService = new AlbumsService(albumCoversService, cacheService);
-  const albumLikesService = new AlbumLikesService(cacheService);
-  const collaborationsService = new CollaborationsService(cacheService);
-  const playlistsService = new PlaylistsService(collaborationsService, cacheService);
-  const playlistSongsService = new PlaylistSongsService(cacheService);
+  const songsService = new SongsService(albumsCacheService);
+  const albumCoversService = new AlbumCoversService(storageService, albumsCacheService);
+  const albumsService = new AlbumsService(albumCoversService, albumsCacheService);
+  const albumLikesService = new AlbumLikesService(albumsCacheService);
+  const collaborationsService = new CollaborationsService();
+  const playlistsService = new PlaylistsService(collaborationsService);
+  const playlistSongsService = new PlaylistSongsService(playlistsCacheService);
 
   const server = Hapi.server({
     port: config.app.port,

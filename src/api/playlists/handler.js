@@ -119,21 +119,26 @@ class PlaylistsHandler {
     };
   }
 
-  async getSongActivitiesFromPlaylistHandler(request) {
+  async getSongActivitiesFromPlaylistHandler(request, h) {
     const { id: playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
     await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId);
 
-    const activities = await this._playlistSongsService.getSongActivitiesFromPlaylist(playlistId);
-
-    return {
+    const [activities, source] = await this._playlistSongsService.getSongActivitiesFromPlaylist(playlistId);
+    const response = h.response({
       status: 'success',
       data: {
         playlistId,
         activities,
-      },
-    };
+      }
+    });
+
+    if (source === 'cache') {
+      response.header('X-Data-Source', 'cache');
+    }
+
+    return response;
   }
 }
 
