@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+const db = require('../../infras/postgres');
 const bcrypt = require('bcrypt');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
@@ -6,10 +6,6 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthenticationError = require('../../exceptions/AuthenticationError');
 
 class UsersService {
-  constructor() {
-    this._pool = new Pool();
-  }
-
   async addUser({ username, password, fullname }) {
     await this.verifyNewUsername(username);
 
@@ -21,7 +17,7 @@ class UsersService {
       values: [id, username, hashedPassword, fullname],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (!result.rowCount) {
       throw new InvariantError('User gagal ditambahkan');
     }
@@ -35,7 +31,7 @@ class UsersService {
       values: [username],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (result.rowCount) {
       throw new InvariantError('Gagal menambahkan user. Username sudah digunakan');
     }
@@ -47,7 +43,7 @@ class UsersService {
       values: [username],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (!result.rowCount) {
       throw new AuthenticationError('Kredensial yang Anda berikan salah');
     }
@@ -68,7 +64,7 @@ class UsersService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Lagu tidak ditemukan');
     }

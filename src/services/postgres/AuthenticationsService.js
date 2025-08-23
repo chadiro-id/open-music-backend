@@ -1,10 +1,8 @@
-const { Pool } = require('pg');
+const db = require('../../infras/postgres');
 const InvariantError = require('../../exceptions/InvariantError');
 
 class AuthenticationsService {
   constructor(cacheService) {
-    this._pool = new Pool();
-
     this._cacheService = cacheService;
   }
 
@@ -14,7 +12,7 @@ class AuthenticationsService {
       values: [token],
     };
 
-    await this._pool.query(query);
+    await db.query(query);
     await this._cacheService.setRefreshToken(token);
   }
 
@@ -29,7 +27,7 @@ class AuthenticationsService {
       values: [token],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Refresh token tidak valid');
@@ -42,7 +40,7 @@ class AuthenticationsService {
       values: [token],
     };
 
-    await this._pool.query(query);
+    await db.query(query);
     await this._cacheService.deleteRefreshToken(token);
   }
 }

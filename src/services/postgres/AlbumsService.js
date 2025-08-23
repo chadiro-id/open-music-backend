@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+const db = require('../../infras/postgres');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
@@ -8,8 +8,6 @@ class AlbumsService {
     albumCoversService,
     cacheService
   ) {
-    this._pool = new Pool();
-
     this._albumCoversService = albumCoversService;
     this._cacheService = cacheService;
   }
@@ -22,7 +20,7 @@ class AlbumsService {
       values: [id, name, year],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (!result.rows[0]?.id) {
       throw new InvariantError('Album gagal ditambahkan');
     }
@@ -42,7 +40,7 @@ class AlbumsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Album tidak ditemukan');
     }
@@ -57,7 +55,7 @@ class AlbumsService {
 
     await this._cacheService.setAlbum(id, album);
 
-    return [album, 'this._pool'];
+    return [album, 'db'];
   }
 
   async editAlbumById(id, { name, year }) {
@@ -66,7 +64,7 @@ class AlbumsService {
       values: [name, year, id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Gagal memperbarui album. Id tidak ditemukan');
     }
@@ -82,7 +80,7 @@ class AlbumsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Album gagal dihapus. Id tidak ditemukan');
     }
@@ -96,7 +94,7 @@ class AlbumsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Album tidak ditemukan');
     }

@@ -1,12 +1,10 @@
-const { Pool } = require('pg');
+const db = require('../../infras/postgres');
 
 class AlbumCoversService {
   constructor(
     storageService,
     cacheService,
   ) {
-    this._pool = new Pool();
-
     this._storageService = storageService;
     this._cacheService = cacheService;
   }
@@ -19,7 +17,7 @@ class AlbumCoversService {
       values: [albumId, coverKey],
     };
 
-    await this._pool.query(query);
+    await db.query(query);
     await this._cacheService.deleteAlbum(albumId);
   }
 
@@ -29,7 +27,7 @@ class AlbumCoversService {
       values: [albumId],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (!result.rowCount) {
       return null;
     }
@@ -63,7 +61,7 @@ class AlbumCoversService {
       values: [albumId],
     };
 
-    const result = await this._pool.query(query);
+    const result = await db.query(query);
     if (result.rows[0]?.cover) {
       await this._storageService.deleteFile(result.rows[0].cover);
     }
