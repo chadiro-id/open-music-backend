@@ -103,9 +103,21 @@ class CacheService {
     await client.del(key);
   }
 
-  async setPlaylistSongActivities(playlistId, values) {
+  async addPlaylistSongActivities(playlistId, values) {
     const key = `playlists:${playlistId}:song_activities`;
-    await client.rPush(key, ...values.map((val) => JSON.stringify(val)));
+    await pool.execute(async (_client) => {
+      _client.watch(key);
+
+      const multi = _client.multi()
+        .rPush(key, ...values.map((val) => JSON.stringify(val)));
+
+      const ttl = await _client.ttl(key);
+      if (ttl < 0) {
+        multi.expire(key, 1800);
+      }
+
+      return multi.exec();
+    });
   }
 
   async getPlaylistSongActivities(playlistId, start = 0, stop = -1) {

@@ -96,7 +96,7 @@ class PlaylistSongsService {
     };
 
     const result = await db.query(query);
-    await this._cacheService.setPlaylistSongActivities(playlistId, result.rows);
+    await this._cacheService.addPlaylistSongActivities(playlistId, result.rows);
 
     return [result.rows, 'main'];
   }
