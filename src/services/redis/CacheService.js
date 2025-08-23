@@ -84,9 +84,9 @@ class CacheService {
     return result.map((member) => JSON.parse(member));
   }
 
-  async removeAlbumSongs(id, value) {
+  async removeAlbumSongs(id, values) {
     const key = `albums:${id}:songs`;
-    await client.sRem(key, JSON.stringify(value));
+    await client.sRem(key, ...values.map((val) => JSON.stringify(val)));
   }
 
   async addPlaylistSongActivities(playlistId, values) {
