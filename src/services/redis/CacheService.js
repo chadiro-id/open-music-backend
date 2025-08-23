@@ -55,23 +55,6 @@ class CacheService {
     await client.del(key);
   }
 
-  // async setAlbumSongs(id, values) {
-  //   const mainKey = `albums:${id}`;
-  //   const isMainKeyExists = await client.exists(mainKey);
-  //   if (!isMainKeyExists) {
-  //     return;
-  //   }
-
-  //   const key = `albums:${id}:songs`;
-  //   await pool.execute(async (dedicatedClient) => {
-  //     await dedicatedClient.watch(mainKey);
-  //     return dedicatedClient.multi()
-  //       .sAdd(key, ...values.map((val) => JSON.stringify(val)))
-  //       .expire(key, await dedicatedClient.ttl(mainKey))
-  //       .exec();
-  //   });
-  // }
-
   async addAlbumSongs(id, values) {
     const mainKey = `albums:${id}`;
     const isMainKeyExists = await client.exists(mainKey);
@@ -105,11 +88,6 @@ class CacheService {
     const key = `albums:${id}:songs`;
     await client.sRem(key, JSON.stringify(value));
   }
-
-  // async deleteAlbumSongs(id) {
-  //   const key = `albums:${id}:songs`;
-  //   await client.del(key);
-  // }
 
   async addPlaylistSongActivities(playlistId, values) {
     const key = `playlists:${playlistId}:song_activities`;
