@@ -45,7 +45,6 @@ class AlbumsService {
     }
 
     const coverUrl = await this._albumCoversService.getCoverUrl(id);
-    console.log(`[Albums Service] get album by id -> cover url: ${coverUrl}`);
 
     const album = {
       ...result.rows[0],
