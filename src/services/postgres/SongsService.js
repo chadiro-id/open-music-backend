@@ -37,21 +37,12 @@ class SongsService {
   }
 
   async getSongs({ title, performer }) {
-    let queryText = 'SELECT id, title, performer FROM songs';
-    const values = [];
+    const query = {
+      text: 'SELECT * FROM find_songs($1, $2)',
+      values: [title, performer]
+    };
 
-    if (title && performer) {
-      queryText += ' WHERE title ILIKE CONCAT(\'%\', $1::text, \'%\') AND performer ILIKE CONCAT(\'%\', $2::text, \'%\')';
-      values.push(title, performer);
-    } else if (title) {
-      queryText += ' WHERE title ILIKE CONCAT(\'%\', $1::text, \'%\')';
-      values.push(title);
-    } else if (performer) {
-      queryText += ' WHERE performer ILIKE CONCAT(\'%\', $1::text, \'%\')';
-      values.push(performer);
-    }
-
-    const result = await db.query(queryText, values);
+    const result = await db.query(query);
     return result.rows;
   }
 
