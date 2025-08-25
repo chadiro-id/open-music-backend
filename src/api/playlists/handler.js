@@ -83,23 +83,29 @@ class PlaylistsHandler {
     return response;
   }
 
-  async getPlaylistWithSongsHandler(request) {
+  async getPlaylistWithSongsHandler(request, h) {
     const { id: playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
     await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId);
 
-    const playlist = await this._playlistsService.getPlaylistById(playlistId);
-    const songs = await this._playlistSongsService.getSongsFromPlaylist(playlistId);
+    const [playlist, playlistSource] = await this._playlistsService.getPlaylistById(playlistId);
+    const [songs, songsSource] = await this._playlistSongsService.getSongsFromPlaylist(playlistId);
 
     playlist.songs = songs;
 
-    return {
+    const response = h.response({
       status: 'success',
       data: {
         playlist,
-      },
-    };
+      }
+    });
+
+    if (playlistSource === 'cache' && songsSource === 'cache') {
+      response.header('X-Data-Source', 'cache');
+    }
+
+    return response;
   }
 
   async deleteSongFromPlaylistHandler(request) {

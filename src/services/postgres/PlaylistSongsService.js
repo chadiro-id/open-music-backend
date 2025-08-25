@@ -26,8 +26,25 @@ class PlaylistSongsService {
         [songActivityId, playlistId, songId, userId, 'add', time]
       );
 
+      const outResult = await client.query(
+        `SELECT u.username, s.title, s.performer
+        FROM playlist_song_activities psa
+        JOIN users u ON u.id = psa.user_id
+        JOIN songs s ON s.id = psa.song_id
+        WHERE psa.playlist_id = $1 AND u.id = $2 AND s.id = $3`,
+        [playlistId, userId, songId],
+      );
+
       await client.query('COMMIT');
-      await this._cacheService.deletePlaylistSongActivities(playlistId);
+      const { username, title, performer } = outResult.rows[0];
+      console.log(username, title, performer, time);
+      await this._cacheService.addPlaylistSongs(playlistId, [{
+        id: songId, title, performer
+      }]);
+      await this._cacheService.addPlaylistSongActivities(playlistId, [{
+        username, title, action: 'add', time
+      }]);
+
       return insertSongResult.rows[0].id;
     } catch (error) {
       console.error(error);
@@ -39,6 +56,11 @@ class PlaylistSongsService {
   }
 
   async getSongsFromPlaylist(playlistId) {
+    const cachedSongs = await this._cacheService.getPlaylistSongs(playlistId);
+    if (Array.isArray(cachedSongs) && cachedSongs.length) {
+      return [cachedSongs, 'cache'];
+    }
+
     const query = {
       text: `SELECT s.id, s.title, s.performer
       FROM playlist_songs ps
@@ -49,7 +71,9 @@ class PlaylistSongsService {
     };
 
     const result = await db.query(query);
-    return result.rows;
+    await this._cacheService.addPlaylistSongs(playlistId, result.rows);
+
+    return [result.rows, 'db'];
   }
 
   async deleteSongFromPlaylist(userId, { playlistId, songId }) {
@@ -68,8 +92,25 @@ class PlaylistSongsService {
         'INSERT INTO playlist_song_activities VALUES ($1, $2, $3, $4, $5, $6)',
         [songActivityId, playlistId, songId, userId, 'delete', time]
       );
+
+      const outResult = await client.query(
+        `SELECT u.username, s.title, s.performer
+        FROM playlist_song_activities psa
+        JOIN users u ON u.id = psa.user_id
+        JOIN songs s ON s.id = psa.song_id
+        WHERE psa.playlist_id = $1 AND u.id = $2 AND s.id = $3`,
+        [playlistId, userId, songId],
+      );
+
       await client.query('COMMIT');
-      await this._cacheService.deletePlaylistSongActivities(playlistId);
+      const { username, title, performer } = outResult.rows[0];
+      console.log(username, title, performer, time);
+      await this._cacheService.removePlaylistSongs(playlistId, [{
+        id: songId, title, performer
+      }]);
+      await this._cacheService.addPlaylistSongActivities(playlistId, [{
+        username, title, action: 'delete', time
+      }]);
     } catch (error) {
       console.error(error);
       await client.query('ROLLBACK');

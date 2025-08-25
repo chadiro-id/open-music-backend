@@ -105,6 +105,7 @@ class SongsService {
     if (albumId) {
       await this._cacheService.deleteAlbum(albumId);
     }
+    await this._cacheService.invalidatePlaylistsBySong(id);
   }
 
   async deleteSongById(id) {
@@ -128,6 +129,8 @@ class SongsService {
     if (albumId) {
       await this._cacheService.removeAlbumSongs(albumId, [{ id: removedId, title, performer }]);
     }
+
+    await this._cacheService.invalidatePlaylistsBySong(id);
   }
 
   async verifySongById(id) {

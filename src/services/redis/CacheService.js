@@ -89,17 +89,93 @@ class CacheService {
     await client.sRem(key, ...values.map((val) => JSON.stringify(val)));
   }
 
+  async setPlaylist(playlistId, value, expirationInSecond = 1800) {
+    const key = `playlists:${playlistId}`;
+    await client.set(key, JSON.stringify(value), { EX: expirationInSecond });
+  }
+
+  async getPlaylist(playlistId) {
+    const key = `playlists:${playlistId}`;
+    const result = await client.get(key);
+    if (result) {
+      return JSON.parse(result);
+    }
+    return result;
+  }
+
+  async deletePlaylist(playlistId) {
+    const playlistKey = `playlists:${playlistId}`;
+    const playlistSongsKey = `${playlistKey}:songs`;
+    const playlistSongActivitiesKey = `${playlistKey}:song_activities`;
+    await client.unlink(playlistKey, playlistSongsKey, playlistSongActivitiesKey);
+  }
+
+  async addPlaylistSongs(playlistId, values) {
+    const mainKey = `playlists:${playlistId}`;
+    const isMainKeyExists = await client.exists(mainKey);
+    if (!isMainKeyExists) {
+      return;
+    }
+
+    const key = `${mainKey}:songs`;
+    await pool.execute(async (_client) => {
+      await _client.watch(mainKey);
+      const mainKeyTTL = await _client.ttl(mainKey);
+
+      const multi =  _client.multi()
+        .sAdd(key, ...values.map((val) => JSON.stringify(val)));
+
+      values.forEach((val) => {
+        multi.sAdd(`songs:${val.id}:playlists`, key);
+        multi.expire(`songs:${val.id}:playlists`, mainKeyTTL);
+      });
+
+      const ttl = await _client.ttl(key);
+      if (ttl < 0) {
+        multi.expire(key, mainKeyTTL);
+      }
+
+      return multi.exec();
+    });
+  }
+
+  async getPlaylistSongs(playlistId) {
+    const key = `playlists:${playlistId}:songs`;
+    const result = await client.sMembers(key);
+    return result.map((member) => JSON.parse(member));
+  }
+
+  async removePlaylistSongs(playlistId, values) {
+    const key = `playlists:${playlistId}:songs`;
+    await client.sRem(key, ...values.map((val) => JSON.stringify(val)));
+  }
+
+  async invalidatePlaylistsBySong(songId) {
+    const keys = await client.sMembers(`songs:${songId}:playlists`);
+    console.log('invalidate', keys);
+    if (keys.length) {
+      const result = await client.unlink(...keys);
+      console.log('invalidate', result);
+    }
+  }
+
   async addPlaylistSongActivities(playlistId, values) {
+    const mainKey = `playlists:${playlistId}`;
+    const isMainKeyExists = await client.exists(mainKey);
+    if (!isMainKeyExists) {
+      return;
+    }
+
     const key = `playlists:${playlistId}:song_activities`;
     await pool.execute(async (_client) => {
-      _client.watch(key);
+      _client.watch(mainKey);
 
       const multi = _client.multi()
         .rPush(key, ...values.map((val) => JSON.stringify(val)));
 
       const ttl = await _client.ttl(key);
       if (ttl < 0) {
-        multi.expire(key, 1800);
+        multi.expire(key, await _client.ttl(mainKey));
       }
 
       return multi.exec();
@@ -112,10 +188,10 @@ class CacheService {
     return result.map((element) => JSON.parse(element));
   }
 
-  async deletePlaylistSongActivities(playlistId) {
-    const key = `playlists:${playlistId}:song_activities`;
-    await client.del(key);
-  }
+  // async deletePlaylistSongActivities(playlistId) {
+  //   const key = `playlists:${playlistId}:song_activities`;
+  //   await client.del(key);
+  // }
 }
 
 module.exports = CacheService;
