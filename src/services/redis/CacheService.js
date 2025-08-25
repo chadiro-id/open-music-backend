@@ -19,13 +19,13 @@ class CacheService {
     return result;
   }
 
-  async setAlbum(id, value, expirationInSecond = 1800) {
-    const key = `albums:${id}`;
+  async setAlbum(albumId, value, expirationInSecond = 1800) {
+    const key = `albums:${albumId}`;
     await client.set(key, JSON.stringify(value), { EX: expirationInSecond });
   }
 
-  async getAlbum(id) {
-    const key = `albums:${id}`;
+  async getAlbum(albumId) {
+    const key = `albums:${albumId}`;
     const result = await client.get(key);
     if (result) {
       return JSON.parse(result);
@@ -33,36 +33,36 @@ class CacheService {
     return result;
   }
 
-  async deleteAlbum(id) {
-    const albumKey = `albums:${id}`;
-    const albumSongsKey = `albums:${id}:songs`;
+  async deleteAlbum(albumId) {
+    const albumKey = `albums:${albumId}`;
+    const albumSongsKey = `albums:${albumId}:songs`;
     await client.unlink(albumKey, albumSongsKey);
   }
 
-  async setAlbumLikesCount(id, value, expirationInSecond = 1800) {
-    const key = `albums:${id}:likes_count`;
+  async setAlbumLikesCount(albumId, value, expirationInSecond = 1800) {
+    const key = `albums:${albumId}:likes_count`;
     await client.set(key, value, { EX: expirationInSecond });
   }
 
-  async getAlbumLikesCount(id) {
-    const key = `albums:${id}:likes_count`;
+  async getAlbumLikesCount(albumId) {
+    const key = `albums:${albumId}:likes_count`;
     const result = await client.get(key);
     return result;
   }
 
-  async deleteAlbumLikesCount(id) {
-    const key = `albums:${id}:likes_count`;
+  async deleteAlbumLikesCount(albumId) {
+    const key = `albums:${albumId}:likes_count`;
     await client.del(key);
   }
 
-  async addAlbumSongs(id, values) {
-    const mainKey = `albums:${id}`;
+  async addAlbumSongs(albumId, values) {
+    const mainKey = `albums:${albumId}`;
     const isMainKeyExists = await client.exists(mainKey);
     if (!isMainKeyExists) {
       return;
     }
 
-    const key = `albums:${id}:songs`;
+    const key = `albums:${albumId}:songs`;
     await pool.execute(async (_client) => {
       await _client.watch(mainKey);
 
@@ -78,14 +78,14 @@ class CacheService {
     });
   }
 
-  async getAlbumSongs(id) {
-    const key = `albums:${id}:songs`;
+  async getAlbumSongs(albumId) {
+    const key = `albums:${albumId}:songs`;
     const result = await client.sMembers(key);
     return result.map((member) => JSON.parse(member));
   }
 
-  async removeAlbumSongs(id, values) {
-    const key = `albums:${id}:songs`;
+  async removeAlbumSongs(albumId, values) {
+    const key = `albums:${albumId}:songs`;
     await client.sRem(key, ...values.map((val) => JSON.stringify(val)));
   }
 
