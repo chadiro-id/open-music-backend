@@ -36,8 +36,9 @@ class PlaylistSongsService {
       );
 
       await client.query('COMMIT');
+
       const { username, title, performer } = outResult.rows[0];
-      console.log(username, title, performer, time);
+
       await this._cacheService.addPlaylistSongs(playlistId, [{
         id: songId, title, performer
       }]);
@@ -103,8 +104,9 @@ class PlaylistSongsService {
       );
 
       await client.query('COMMIT');
+
       const { username, title, performer } = outResult.rows[0];
-      console.log(username, title, performer, time);
+
       await this._cacheService.removePlaylistSongs(playlistId, [{
         id: songId, title, performer
       }]);
