@@ -152,10 +152,8 @@ class CacheService {
 
   async invalidatePlaylistsBySong(songId) {
     const keys = await client.sMembers(`songs:${songId}:playlists`);
-    console.log('invalidate', keys);
     if (keys.length) {
-      const result = await client.unlink(...keys);
-      console.log('invalidate', result);
+      await client.unlink(...keys);
     }
   }
 
@@ -187,11 +185,6 @@ class CacheService {
     const result = await client.lRange(key, start, stop);
     return result.map((element) => JSON.parse(element));
   }
-
-  // async deletePlaylistSongActivities(playlistId) {
-  //   const key = `playlists:${playlistId}:song_activities`;
-  //   await client.del(key);
-  // }
 }
 
 module.exports = CacheService;
